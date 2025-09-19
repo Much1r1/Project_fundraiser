@@ -49,8 +49,8 @@ const CampaignDetailPage = () => {
       'https://images.pexels.com/photos/1146708/pexels-photo-1146708.jpeg?auto=compress&cs=tinysrgb&w=800',
       'https://images.pexels.com/photos/1108925/pexels-photo-1108925.jpeg?auto=compress&cs=tinysrgb&w=800',
     ],
-    raised: 15420,
-    goal: 25000,
+    raised: 1542000,
+    goal: 2500000,
     donorCount: 89,
     daysLeft: 12,
     category: 'Community',
@@ -69,7 +69,7 @@ const CampaignDetailPage = () => {
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
-      currency: 'USD',
+      currency: 'KES',
       minimumFractionDigits: 0,
     }).format(amount);
   };

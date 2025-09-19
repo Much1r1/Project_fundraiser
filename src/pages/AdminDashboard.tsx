@@ -14,7 +14,7 @@ const AdminDashboard = () => {
 
   // Mock data
   const overviewStats = {
-    totalRaised: 1245670,
+    totalRaised: 124567000,
     activeCampaigns: 234,
     totalUsers: 12890,
     successRate: 87,
@@ -47,7 +47,7 @@ const AdminDashboard = () => {
       title: 'Medical Treatment for Sarah',
       creator: 'John Doe',
       category: 'Medical',
-      goal: 15000,
+      goal: 1500000,
       submitted: '2024-01-20',
       status: 'pending',
     },
@@ -56,7 +56,7 @@ const AdminDashboard = () => {
       title: 'School Library Renovation',
       creator: 'Jane Smith',
       category: 'Education',
-      goal: 8000,
+      goal: 800000,
       submitted: '2024-01-19',
       status: 'pending',
     },
@@ -65,7 +65,7 @@ const AdminDashboard = () => {
       title: 'Emergency Relief Fund',
       creator: 'Mike Johnson',
       category: 'Emergency',
-      goal: 25000,
+      goal: 2500000,
       submitted: '2024-01-18',
       status: 'under_review',
     },
@@ -95,7 +95,7 @@ const AdminDashboard = () => {
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
-      currency: 'USD',
+      currency: 'KES',
       minimumFractionDigits: 0,
     }).format(amount);
   };

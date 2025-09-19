@@ -162,16 +162,16 @@ const CreateCampaignPage = () => {
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   <div className="flex items-center">
                     <DollarSign className="h-4 w-4 mr-1" />
-                    Fundraising Goal *
+                    Fundraising Goal (KES) *
                   </div>
                 </label>
                 <input
                   {...register('goal')}
                   type="number"
-                  min="100"
-                  step="10"
+                  min="10000"
+                  step="1000"
                   className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
-                  placeholder="e.g., 5000"
+                  placeholder="e.g., 500000"
                 />
                 {errors.goal && (
                   <p className="mt-1 text-sm text-red-600 dark:text-red-400">
@@ -180,8 +180,8 @@ const CreateCampaignPage = () => {
                 )}
                 {watchedGoal && (
                   <p className="mt-1 text-sm text-gray-600 dark:text-gray-300">
-                    Platform fee (5%): ${Math.round(watchedGoal * 0.05)} | 
-                    You'll receive: ${Math.round(watchedGoal * 0.95)}
+                    Platform fee (5%): KES {Math.round(watchedGoal * 0.05).toLocaleString()} | 
+                    You'll receive: KES {Math.round(watchedGoal * 0.95).toLocaleString()}
                   </p>
                 )}
               </div>

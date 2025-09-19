@@ -17,7 +17,7 @@ const DonorWall = () => {
     {
       id: '1',
       name: 'Sarah Johnson',
-      amount: 500,
+      amount: 50000,
       message: 'This is such an important cause. Happy to help make a difference!',
       avatar: 'https://images.pexels.com/photos/415829/pexels-photo-415829.jpeg?auto=compress&cs=tinysrgb&w=100',
       isAnonymous: false,
@@ -27,7 +27,7 @@ const DonorWall = () => {
     {
       id: '2',
       name: 'Michael Chen',
-      amount: 250,
+      amount: 25000,
       message: 'Clean water is a basic human right. Keep up the great work!',
       avatar: 'https://images.pexels.com/photos/1040881/pexels-photo-1040881.jpeg?auto=compress&cs=tinysrgb&w=100',
       isAnonymous: false,
@@ -36,7 +36,7 @@ const DonorWall = () => {
     {
       id: '3',
       name: 'Anonymous',
-      amount: 100,
+      amount: 10000,
       message: '',
       avatar: '',
       isAnonymous: true,
@@ -45,7 +45,7 @@ const DonorWall = () => {
     {
       id: '4',
       name: 'Emily Rodriguez',
-      amount: 75,
+      amount: 7500,
       message: 'Every drop counts! 💧',
       avatar: 'https://images.pexels.com/photos/1239291/pexels-photo-1239291.jpeg?auto=compress&cs=tinysrgb&w=100',
       isAnonymous: false,
@@ -54,7 +54,7 @@ const DonorWall = () => {
     {
       id: '5',
       name: 'David Thompson',
-      amount: 200,
+      amount: 20000,
       message: 'Proud to support this initiative. Together we can make change happen.',
       avatar: 'https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&w=100',
       isAnonymous: false,
@@ -65,14 +65,14 @@ const DonorWall = () => {
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
-      currency: 'USD',
+      currency: 'KES',
       minimumFractionDigits: 0,
     }).format(amount);
   };
 
   const getDonorBadge = (amount: number) => {
-    if (amount >= 500) return { icon: Star, color: 'text-yellow-500', label: 'Champion' };
-    if (amount >= 200) return { icon: Award, color: 'text-blue-500', label: 'Supporter' };
+    if (amount >= 50000) return { icon: Star, color: 'text-yellow-500', label: 'Champion' };
+    if (amount >= 20000) return { icon: Award, color: 'text-blue-500', label: 'Supporter' };
     return { icon: Heart, color: 'text-emerald-500', label: 'Helper' };
   };
 

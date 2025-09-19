@@ -15,7 +15,7 @@ const ProfilePage = () => {
     {
       id: '1',
       campaignTitle: 'Help Build Clean Water Wells in Rural Kenya',
-      amount: 50,
+      amount: 5000,
       date: '2024-01-20',
       receiptUrl: '#',
       status: 'completed',
@@ -23,7 +23,7 @@ const ProfilePage = () => {
     {
       id: '2',
       campaignTitle: 'Emergency Surgery Fund for Baby Sarah',
-      amount: 100,
+      amount: 10000,
       date: '2024-01-18',
       receiptUrl: '#',
       status: 'completed',
@@ -31,7 +31,7 @@ const ProfilePage = () => {
     {
       id: '3',
       campaignTitle: 'School Books for Underprivileged Children',
-      amount: 25,
+      amount: 2500,
       date: '2024-01-15',
       receiptUrl: '#',
       status: 'completed',
@@ -42,8 +42,8 @@ const ProfilePage = () => {
     {
       id: '1',
       title: 'Help My Family Rebuild After Fire',
-      raised: 3200,
-      goal: 8000,
+      raised: 320000,
+      goal: 800000,
       donors: 42,
       status: 'active',
       daysLeft: 18,
@@ -51,7 +51,7 @@ const ProfilePage = () => {
   ];
 
   const stats = {
-    totalDonated: 175,
+    totalDonated: 17500,
     campaignsSupported: 3,
     livesImpacted: 127,
     longestStreak: 15,
@@ -60,7 +60,7 @@ const ProfilePage = () => {
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
-      currency: 'USD',
+      currency: 'KES',
       minimumFractionDigits: 0,
     }).format(amount);
   };

@@ -6,14 +6,22 @@ import StreakTracker from '../components/gamification/StreakTracker';
 import Leaderboard from '../components/gamification/Leaderboard';
 
 const HomePage = () => {
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('en-KE', {
+      style: 'currency',
+      currency: 'KES',
+      minimumFractionDigits: 0,
+    }).format(amount);
+  };
+
   const featuredCampaigns = [
     {
       id: '1',
       title: 'Help Build Clean Water Wells in Rural Kenya',
       description: 'Providing clean water access to over 500 families in remote villages.',
       imageUrl: 'https://images.pexels.com/photos/1090638/pexels-photo-1090638.jpeg?auto=compress&cs=tinysrgb&w=800',
-      raised: 15420,
-      goal: 25000,
+      raised: 1542000,
+      goal: 2500000,
       donorCount: 89,
       daysLeft: 12,
       category: 'Community',
@@ -24,8 +32,8 @@ const HomePage = () => {
       title: 'Emergency Surgery Fund for Baby Sarah',
       description: 'Help save baby Sarah who needs urgent heart surgery.',
       imageUrl: 'https://images.pexels.com/photos/3845457/pexels-photo-3845457.jpeg?auto=compress&cs=tinysrgb&w=800',
-      raised: 8950,
-      goal: 12000,
+      raised: 895000,
+      goal: 1200000,
       donorCount: 67,
       daysLeft: 5,
       category: 'Medical',
@@ -36,8 +44,8 @@ const HomePage = () => {
       title: 'School Books for Underprivileged Children',
       description: 'Providing educational resources to 200 children in underserved areas.',
       imageUrl: 'https://images.pexels.com/photos/159675/love-school-learn-book-159675.jpeg?auto=compress&cs=tinysrgb&w=800',
-      raised: 3200,
-      goal: 8000,
+      raised: 320000,
+      goal: 800000,
       donorCount: 42,
       daysLeft: 18,
       category: 'Education',
@@ -49,6 +57,7 @@ const HomePage = () => {
     { icon: Target, label: 'Campaigns Funded', value: '12,547' },
     { icon: Users, label: 'Lives Impacted', value: '2.3M' },
     { icon: TrendingUp, label: 'Funds Raised', value: '$45.2M' },
+    { icon: TrendingUp, label: 'Funds Raised', value: 'KES 4.5B' },
     { icon: Award, label: 'Success Rate', value: '87%' },
   ];
 

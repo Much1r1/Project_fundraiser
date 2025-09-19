@@ -18,7 +18,7 @@ const Leaderboard = () => {
       avatar: 'https://images.pexels.com/photos/415829/pexels-photo-415829.jpeg?auto=compress&cs=tinysrgb&w=100',
       streak: 45,
       donations: 127,
-      totalDonated: 5420,
+      totalDonated: 542000,
     },
     {
       rank: 2,
@@ -26,7 +26,7 @@ const Leaderboard = () => {
       avatar: 'https://images.pexels.com/photos/1040881/pexels-photo-1040881.jpeg?auto=compress&cs=tinysrgb&w=100',
       streak: 38,
       donations: 89,
-      totalDonated: 4150,
+      totalDonated: 415000,
     },
     {
       rank: 3,
@@ -34,7 +34,7 @@ const Leaderboard = () => {
       avatar: 'https://images.pexels.com/photos/1239291/pexels-photo-1239291.jpeg?auto=compress&cs=tinysrgb&w=100',
       streak: 32,
       donations: 76,
-      totalDonated: 3680,
+      totalDonated: 368000,
     },
     {
       rank: 4,
@@ -42,7 +42,7 @@ const Leaderboard = () => {
       avatar: 'https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&w=100',
       streak: 28,
       donations: 54,
-      totalDonated: 2890,
+      totalDonated: 289000,
     },
     {
       rank: 5,
@@ -50,7 +50,7 @@ const Leaderboard = () => {
       avatar: 'https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg?auto=compress&cs=tinysrgb&w=100',
       streak: 25,
       donations: 43,
-      totalDonated: 2340,
+      totalDonated: 234000,
     },
   ];
 
@@ -70,7 +70,7 @@ const Leaderboard = () => {
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
-      currency: 'USD',
+      currency: 'KES',
       minimumFractionDigits: 0,
     }).format(amount);
   };

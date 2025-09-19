@@ -13,12 +13,14 @@ interface DonationModalProps {
 
 const DonationModal: React.FC<DonationModalProps> = ({ campaign, onClose }) => {
   const [amount, setAmount] = useState(25);
+  const [amount, setAmount] = useState(2500);
   const [isAnonymous, setIsAnonymous] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<'card' | 'mpesa' | 'paypal'>('card');
   const [message, setMessage] = useState('');
   const [step, setStep] = useState<'amount' | 'payment' | 'success'>('amount');
 
   const presetAmounts = [10, 25, 50, 100, 250];
+  const presetAmounts = [1000, 2500, 5000, 10000, 25000];
 
   const handleDonate = () => {
     // Simulate payment processing
@@ -77,13 +79,13 @@ const DonationModal: React.FC<DonationModalProps> = ({ campaign, onClose }) => {
                           : 'border-gray-300 dark:border-gray-600 hover:border-emerald-300 dark:hover:border-emerald-700'
                       }`}
                     >
-                      ${preset}
+                     KES {preset.toLocaleString()}
                     </button>
                   ))}
                 </div>
                 <div className="relative">
                   <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">
-                    $
+                    KES
                   </span>
                   <input
                     type="number"
@@ -181,7 +183,7 @@ const DonationModal: React.FC<DonationModalProps> = ({ campaign, onClose }) => {
                 onClick={handleDonate}
                 className="w-full bg-emerald-600 text-white py-3 px-4 rounded-lg hover:bg-emerald-700 transition-colors font-semibold"
               >
-                Donate ${amount}
+                Donate KES {amount.toLocaleString()}
               </button>
             </div>
           )}
@@ -207,7 +209,7 @@ const DonationModal: React.FC<DonationModalProps> = ({ campaign, onClose }) => {
                 Thank you for your donation!
               </h4>
               <p className="text-gray-600 dark:text-gray-300 mb-4">
-                Your ${amount} donation to "{campaign.title}" has been processed successfully.
+                Your KES {amount.toLocaleString()} donation to "{campaign.title}" has been processed successfully.
               </p>
               <div className="space-y-3">
                 <button

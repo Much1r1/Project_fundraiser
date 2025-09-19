@@ -8,6 +8,14 @@ const CampaignsPage = () => {
   const [sortBy, setSortBy] = useState('trending');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('en-KE', {
+      style: 'currency',
+      currency: 'KES',
+      minimumFractionDigits: 0,
+    }).format(amount);
+  };
+
   const categories = [
     'All', 'Medical', 'Education', 'Community', 'Emergency', 'Environment', 'Animals'
   ];
@@ -26,8 +34,8 @@ const CampaignsPage = () => {
       title: 'Help Build Clean Water Wells in Rural Kenya',
       description: 'Providing clean water access to over 500 families in remote villages across Kenya. This project will drill 5 new wells and provide maintenance training to local communities.',
       imageUrl: 'https://images.pexels.com/photos/1090638/pexels-photo-1090638.jpeg?auto=compress&cs=tinysrgb&w=800',
-      raised: 15420,
-      goal: 25000,
+      raised: 1542000,
+      goal: 2500000,
       donorCount: 89,
       daysLeft: 12,
       category: 'Community',
@@ -39,8 +47,8 @@ const CampaignsPage = () => {
       title: 'Emergency Surgery Fund for Baby Sarah',
       description: 'Help save baby Sarah who needs urgent heart surgery. She was born with a congenital heart defect and needs immediate medical intervention.',
       imageUrl: 'https://images.pexels.com/photos/3845457/pexels-photo-3845457.jpeg?auto=compress&cs=tinysrgb&w=800',
-      raised: 8950,
-      goal: 12000,
+      raised: 895000,
+      goal: 1200000,
       donorCount: 67,
       daysLeft: 5,
       category: 'Medical',
@@ -52,8 +60,8 @@ const CampaignsPage = () => {
       title: 'School Books for Underprivileged Children',
       description: 'Providing educational resources to 200 children in underserved areas. Books, supplies, and learning materials for a better future.',
       imageUrl: 'https://images.pexels.com/photos/159675/love-school-learn-book-159675.jpeg?auto=compress&cs=tinysrgb&w=800',
-      raised: 3200,
-      goal: 8000,
+      raised: 320000,
+      goal: 800000,
       donorCount: 42,
       daysLeft: 18,
       category: 'Education',
@@ -65,8 +73,8 @@ const CampaignsPage = () => {
       title: 'Wildfire Relief for Displaced Families',
       description: 'Supporting families who lost their homes in recent wildfires. Providing temporary housing, food, and essential supplies.',
       imageUrl: 'https://images.pexels.com/photos/1112080/pexels-photo-1112080.jpeg?auto=compress&cs=tinysrgb&w=800',
-      raised: 22500,
-      goal: 35000,
+      raised: 2250000,
+      goal: 3500000,
       donorCount: 156,
       daysLeft: 8,
       category: 'Emergency',
@@ -78,8 +86,8 @@ const CampaignsPage = () => {
       title: 'Save the Coral Reef Initiative',
       description: 'Marine conservation project to restore coral reefs and protect marine biodiversity for future generations.',
       imageUrl: 'https://images.pexels.com/photos/1022923/pexels-photo-1022923.jpeg?auto=compress&cs=tinysrgb&w=800',
-      raised: 7800,
-      goal: 20000,
+      raised: 780000,
+      goal: 2000000,
       donorCount: 98,
       daysLeft: 25,
       category: 'Environment',
@@ -91,8 +99,8 @@ const CampaignsPage = () => {
       title: 'Animal Shelter Expansion Project',
       description: 'Help us expand our animal shelter to accommodate more rescued animals and provide better care facilities.',
       imageUrl: 'https://images.pexels.com/photos/1805164/pexels-photo-1805164.jpeg?auto=compress&cs=tinysrgb&w=800',
-      raised: 12300,
-      goal: 18000,
+      raised: 1230000,
+      goal: 1800000,
       donorCount: 134,
       daysLeft: 15,
       category: 'Animals',
