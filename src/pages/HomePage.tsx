@@ -4,60 +4,16 @@ import { TrendingUp, Users, Target, Award, ArrowRight } from 'lucide-react';
 import CampaignCard from '../components/campaigns/CampaignCard';
 import StreakTracker from '../components/gamification/StreakTracker';
 import Leaderboard from '../components/gamification/Leaderboard';
+import { useCampaigns } from '../hooks/useCampaigns';
+import LoadingSpinner from '../components/ui/LoadingSpinner';
 
 const HomePage = () => {
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-KE', {
-      style: 'currency',
-      currency: 'KES',
-      minimumFractionDigits: 0,
-    }).format(amount);
-  };
-
-  const featuredCampaigns = [
-    {
-      id: '1',
-      title: 'Help Build Clean Water Wells in Rural Kenya',
-      description: 'Providing clean water access to over 500 families in remote villages.',
-      imageUrl: 'https://images.pexels.com/photos/1090638/pexels-photo-1090638.jpeg?auto=compress&cs=tinysrgb&w=800',
-      raised: 1542000,
-      goal: 2500000,
-      donorCount: 89,
-      daysLeft: 12,
-      category: 'Community',
-      verified: true,
-    },
-    {
-      id: '2',
-      title: 'Emergency Surgery Fund for Baby Sarah',
-      description: 'Help save baby Sarah who needs urgent heart surgery.',
-      imageUrl: 'https://images.pexels.com/photos/3845457/pexels-photo-3845457.jpeg?auto=compress&cs=tinysrgb&w=800',
-      raised: 895000,
-      goal: 1200000,
-      donorCount: 67,
-      daysLeft: 5,
-      category: 'Medical',
-      verified: true,
-    },
-    {
-      id: '3',
-      title: 'School Books for Underprivileged Children',
-      description: 'Providing educational resources to 200 children in underserved areas.',
-      imageUrl: 'https://images.pexels.com/photos/159675/love-school-learn-book-159675.jpeg?auto=compress&cs=tinysrgb&w=800',
-      raised: 320000,
-      goal: 800000,
-      donorCount: 42,
-      daysLeft: 18,
-      category: 'Education',
-      verified: false,
-    },
-  ];
+  const { campaigns, loading } = useCampaigns({ limit: 3 });
 
   const stats = [
-    { icon: Target, label: 'Campaigns Funded', value: '12,547' },
-    { icon: Users, label: 'Lives Impacted', value: '2.3M' },
-    { icon: TrendingUp, label: 'Funds Raised', value: '$45.2M' },
-    { icon: TrendingUp, label: 'Funds Raised', value: 'KES 4.5B' },
+    { icon: Target, label: 'Active Campaigns', value: '234' },
+    { icon: Users, label: 'Lives Impacted', value: '12.8K' },
+    { icon: TrendingUp, label: 'Funds Raised', value: 'KES 45.2M' },
     { icon: Award, label: 'Success Rate', value: '87%' },
   ];
 
@@ -74,7 +30,7 @@ const HomePage = () => {
               </span>
             </h1>
             <p className="text-xl md:text-2xl mb-8 text-blue-100 max-w-3xl mx-auto">
-              Join millions of people supporting causes they care about. Start a campaign or donate to existing ones.
+              Join thousands of Kenyans supporting causes they care about. Start a campaign or donate to existing ones.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link
@@ -126,21 +82,29 @@ const HomePage = () => {
             </p>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
-            {featuredCampaigns.map((campaign) => (
-              <CampaignCard key={campaign.id} campaign={campaign} />
-            ))}
-          </div>
+          {loading ? (
+            <div className="flex justify-center">
+              <LoadingSpinner />
+            </div>
+          ) : (
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
+                {campaigns.map((campaign) => (
+                  <CampaignCard key={campaign.id} campaign={campaign} />
+                ))}
+              </div>
 
-          <div className="text-center">
-            <Link
-              to="/campaigns"
-              className="inline-flex items-center px-6 py-3 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors"
-            >
-              View All Campaigns
-              <ArrowRight className="ml-2 h-5 w-5" />
-            </Link>
-          </div>
+              <div className="text-center">
+                <Link
+                  to="/campaigns"
+                  className="inline-flex items-center px-6 py-3 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors"
+                >
+                  View All Campaigns
+                  <ArrowRight className="ml-2 h-5 w-5" />
+                </Link>
+              </div>
+            </>
+          )}
         </div>
       </section>
 

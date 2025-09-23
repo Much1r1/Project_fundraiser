@@ -1,33 +1,46 @@
 import React, { useState } from 'react';
 import { X, CreditCard, Smartphone, Banknote, Lock, Heart } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useDonations } from '../../hooks/useDonations';
+import { Campaign } from '../../lib/supabase';
+import toast from 'react-hot-toast';
 
 interface DonationModalProps {
-  campaign: {
-    id: string;
-    title: string;
-    creator: { name: string };
-  };
+  campaign: Campaign;
   onClose: () => void;
 }
 
 const DonationModal: React.FC<DonationModalProps> = ({ campaign, onClose }) => {
-  const [amount, setAmount] = useState(25);
   const [amount, setAmount] = useState(2500);
   const [isAnonymous, setIsAnonymous] = useState(false);
-  const [paymentMethod, setPaymentMethod] = useState<'card' | 'mpesa' | 'paypal'>('card');
+  const [paymentMethod, setPaymentMethod] = useState<'card' | 'mpesa' | 'paypal'>('mpesa');
   const [message, setMessage] = useState('');
   const [step, setStep] = useState<'amount' | 'payment' | 'success'>('amount');
 
-  const presetAmounts = [10, 25, 50, 100, 250];
+  const { createDonation } = useDonations();
+
   const presetAmounts = [1000, 2500, 5000, 10000, 25000];
 
-  const handleDonate = () => {
-    // Simulate payment processing
-    setStep('payment');
-    setTimeout(() => {
-      setStep('success');
-    }, 2000);
+  const handleDonate = async () => {
+    try {
+      setStep('payment');
+      
+      await createDonation({
+        campaign_id: campaign.id,
+        amount,
+        payment_method: paymentMethod,
+        is_anonymous: isAnonymous,
+        donor_message: message || undefined,
+      });
+
+      setTimeout(() => {
+        setStep('success');
+        toast.success('Thank you for your donation!');
+      }, 2000);
+    } catch (error) {
+      toast.error('Failed to process donation. Please try again.');
+      setStep('amount');
+    }
   };
 
   return (
@@ -59,7 +72,7 @@ const DonationModal: React.FC<DonationModalProps> = ({ campaign, onClose }) => {
                   {campaign.title}
                 </h4>
                 <p className="text-gray-600 dark:text-gray-300">
-                  By {campaign.creator.name}
+                  By {campaign.users.full_name}
                 </p>
               </div>
 
@@ -79,7 +92,7 @@ const DonationModal: React.FC<DonationModalProps> = ({ campaign, onClose }) => {
                           : 'border-gray-300 dark:border-gray-600 hover:border-emerald-300 dark:hover:border-emerald-700'
                       }`}
                     >
-                     KES {preset.toLocaleString()}
+                      KES {preset.toLocaleString()}
                     </button>
                   ))}
                 </div>
@@ -91,7 +104,7 @@ const DonationModal: React.FC<DonationModalProps> = ({ campaign, onClose }) => {
                     type="number"
                     value={amount}
                     onChange={(e) => setAmount(Number(e.target.value))}
-                    className="w-full pl-8 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                    className="w-full pl-12 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
                     placeholder="Enter custom amount"
                   />
                 </div>
@@ -107,18 +120,6 @@ const DonationModal: React.FC<DonationModalProps> = ({ campaign, onClose }) => {
                     <input
                       type="radio"
                       name="payment"
-                      value="card"
-                      checked={paymentMethod === 'card'}
-                      onChange={(e) => setPaymentMethod(e.target.value as any)}
-                      className="text-emerald-600"
-                    />
-                    <CreditCard className="h-5 w-5 ml-3 mr-2 text-gray-600 dark:text-gray-300" />
-                    <span className="text-gray-900 dark:text-white">Credit/Debit Card</span>
-                  </label>
-                  <label className="flex items-center p-3 border border-gray-300 dark:border-gray-600 rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700">
-                    <input
-                      type="radio"
-                      name="payment"
                       value="mpesa"
                       checked={paymentMethod === 'mpesa'}
                       onChange={(e) => setPaymentMethod(e.target.value as any)}
@@ -126,6 +127,18 @@ const DonationModal: React.FC<DonationModalProps> = ({ campaign, onClose }) => {
                     />
                     <Smartphone className="h-5 w-5 ml-3 mr-2 text-gray-600 dark:text-gray-300" />
                     <span className="text-gray-900 dark:text-white">M-Pesa</span>
+                  </label>
+                  <label className="flex items-center p-3 border border-gray-300 dark:border-gray-600 rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700">
+                    <input
+                      type="radio"
+                      name="payment"
+                      value="card"
+                      checked={paymentMethod === 'card'}
+                      onChange={(e) => setPaymentMethod(e.target.value as any)}
+                      className="text-emerald-600"
+                    />
+                    <CreditCard className="h-5 w-5 ml-3 mr-2 text-gray-600 dark:text-gray-300" />
+                    <span className="text-gray-900 dark:text-white">Credit/Debit Card</span>
                   </label>
                   <label className="flex items-center p-3 border border-gray-300 dark:border-gray-600 rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700">
                     <input

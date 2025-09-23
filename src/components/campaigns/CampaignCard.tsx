@@ -1,34 +1,29 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Calendar, Users, MapPin, Verified } from 'lucide-react';
-
-interface Campaign {
-  id: string;
-  title: string;
-  description: string;
-  imageUrl: string;
-  raised: number;
-  goal: number;
-  donorCount: number;
-  daysLeft: number;
-  category: string;
-  verified?: boolean;
-  location?: string;
-}
+import { Campaign } from '../../lib/supabase';
 
 interface CampaignCardProps {
   campaign: Campaign;
 }
 
 const CampaignCard: React.FC<CampaignCardProps> = ({ campaign }) => {
-  const progressPercentage = (campaign.raised / campaign.goal) * 100;
+  const progressPercentage = (campaign.current_amount / campaign.goal_amount) * 100;
   
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
+    return new Intl.NumberFormat('en-KE', {
       style: 'currency',
       currency: 'KES',
       minimumFractionDigits: 0,
     }).format(amount);
+  };
+
+  const getDaysLeft = (endDate: string) => {
+    const end = new Date(endDate);
+    const now = new Date();
+    const diffTime = end.getTime() - now.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return Math.max(0, diffDays);
   };
 
   const getCategoryColor = (category: string) => {
@@ -38,15 +33,23 @@ const CampaignCard: React.FC<CampaignCardProps> = ({ campaign }) => {
       Community: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300',
       Emergency: 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300',
       Environment: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-300',
+      Animals: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300',
+      Sports: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300',
+      Technology: 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-300',
+      Arts: 'bg-pink-100 text-pink-800 dark:bg-pink-900 dark:text-pink-300',
+      Religious: 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300',
     };
     return colors[category as keyof typeof colors] || 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300';
   };
+
+  const daysLeft = getDaysLeft(campaign.end_date);
+  const isVerified = campaign.verification_status === 'verified';
 
   return (
     <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300">
       <div className="relative">
         <img
-          src={campaign.imageUrl}
+          src={campaign.image_url || 'https://images.pexels.com/photos/6995242/pexels-photo-6995242.jpeg?auto=compress&cs=tinysrgb&w=800'}
           alt={campaign.title}
           className="w-full h-48 object-cover"
         />
@@ -55,7 +58,7 @@ const CampaignCard: React.FC<CampaignCardProps> = ({ campaign }) => {
             {campaign.category}
           </span>
         </div>
-        {campaign.verified && (
+        {isVerified && (
           <div className="absolute top-4 right-4">
             <div className="bg-blue-600 rounded-full p-1">
               <Verified className="h-4 w-4 text-white" />
@@ -85,22 +88,38 @@ const CampaignCard: React.FC<CampaignCardProps> = ({ campaign }) => {
           </div>
           <div className="flex justify-between mt-2">
             <span className="text-lg font-semibold text-gray-900 dark:text-white">
-              {formatCurrency(campaign.raised)}
+              {formatCurrency(campaign.current_amount)}
             </span>
             <span className="text-sm text-gray-500 dark:text-gray-400">
-              of {formatCurrency(campaign.goal)}
+              of {formatCurrency(campaign.goal_amount)}
             </span>
           </div>
         </div>
 
         <div className="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400 mb-4">
           <div className="flex items-center">
-            <Users className="h-4 w-4 mr-1" />
-            <span>{campaign.donorCount} donors</span>
+            <MapPin className="h-4 w-4 mr-1" />
+            <span>{campaign.location}</span>
           </div>
           <div className="flex items-center">
             <Calendar className="h-4 w-4 mr-1" />
-            <span>{campaign.daysLeft} days left</span>
+            <span>{daysLeft} days left</span>
+          </div>
+        </div>
+
+        <div className="flex items-center mb-4">
+          <img
+            src={campaign.users.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(campaign.users.full_name)}&background=10b981&color=fff`}
+            alt={campaign.users.full_name}
+            className="w-8 h-8 rounded-full mr-3"
+          />
+          <div>
+            <p className="text-sm font-medium text-gray-900 dark:text-white">
+              {campaign.users.full_name}
+            </p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">
+              Campaign Organizer
+            </p>
           </div>
         </div>
 

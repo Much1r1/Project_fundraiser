@@ -8,88 +8,61 @@ import DonationModal from '../components/donations/DonationModal';
 import ShareButtons from '../components/social/ShareButtons';
 import DonorWall from '../components/campaigns/DonorWall';
 import CommentSection from '../components/campaigns/CommentSection';
+import LoadingSpinner from '../components/ui/LoadingSpinner';
+import { useCampaign } from '../hooks/useCampaigns';
+import { useDonations } from '../hooks/useDonations';
 
 const CampaignDetailPage = () => {
-  const { id } = useParams();
+  const { id } = useParams<{ id: string }>();
   const [showDonationModal, setShowDonationModal] = useState(false);
   const [activeTab, setActiveTab] = useState<'story' | 'updates' | 'donors' | 'comments'>('story');
 
-  // Mock campaign data
-  const campaign = {
-    id: '1',
-    title: 'Help Build Clean Water Wells in Rural Kenya',
-    description: 'Providing clean water access to over 500 families in remote villages across Kenya.',
-    fullStory: `
-      <p>Access to clean water is a fundamental human right, yet millions of people in rural Kenya still lack this basic necessity. Our project aims to drill 5 new wells in remote villages, providing sustainable access to clean water for over 500 families.</p>
-      
-      <h3>The Challenge</h3>
-      <p>Many communities in rural Kenya have to walk miles every day just to collect water from contaminated sources. This water often carries diseases and puts families at risk. Women and children bear the burden of water collection, preventing children from attending school and limiting economic opportunities for families.</p>
-      
-      <h3>Our Solution</h3>
-      <p>We partner with local communities to identify the best locations for wells and provide training for ongoing maintenance. Each well will serve approximately 100 families and includes:</p>
-      <ul>
-        <li>Professional drilling and construction</li>
-        <li>Water quality testing and treatment systems</li>
-        <li>Community training for maintenance</li>
-        <li>Long-term monitoring and support</li>
-      </ul>
-      
-      <h3>Impact</h3>
-      <p>Your donation will directly improve lives by:</p>
-      <ul>
-        <li>Reducing water-borne diseases by 80%</li>
-        <li>Allowing children to attend school instead of collecting water</li>
-        <li>Enabling women to pursue income-generating activities</li>
-        <li>Building stronger, healthier communities</li>
-      </ul>
-    `,
-    imageUrl: 'https://images.pexels.com/photos/1090638/pexels-photo-1090638.jpeg?auto=compress&cs=tinysrgb&w=1200',
-    images: [
-      'https://images.pexels.com/photos/1090638/pexels-photo-1090638.jpeg?auto=compress&cs=tinysrgb&w=800',
-      'https://images.pexels.com/photos/1146708/pexels-photo-1146708.jpeg?auto=compress&cs=tinysrgb&w=800',
-      'https://images.pexels.com/photos/1108925/pexels-photo-1108925.jpeg?auto=compress&cs=tinysrgb&w=800',
-    ],
-    raised: 1542000,
-    goal: 2500000,
-    donorCount: 89,
-    daysLeft: 12,
-    category: 'Community',
-    location: 'Kenya',
-    verified: true,
-    creator: {
-      name: 'Kenya Water Foundation',
-      avatar: 'https://images.pexels.com/photos/415829/pexels-photo-415829.jpeg?auto=compress&cs=tinysrgb&w=100',
-      verified: true,
-    },
-    createdAt: '2024-01-15',
-  };
+  const { campaign, loading, error } = useCampaign(id!);
+  const { donations } = useDonations(id);
 
-  const progressPercentage = (campaign.raised / campaign.goal) * 100;
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
+        <LoadingSpinner />
+      </div>
+    );
+  }
+
+  if (error || !campaign) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center">
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+              Campaign Not Found
+            </h2>
+            <p className="text-gray-600 dark:text-gray-300">{error}</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  const progressPercentage = (campaign.current_amount / campaign.goal_amount) * 100;
+  const donorCount = donations.length;
 
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
+    return new Intl.NumberFormat('en-KE', {
       style: 'currency',
       currency: 'KES',
       minimumFractionDigits: 0,
     }).format(amount);
   };
 
-  const updates = [
-    {
-      id: '1',
-      title: 'First Well Complete!',
-      content: 'We\'re excited to announce that our first well is now operational and serving 98 families in Kibera village. The community celebration was incredible!',
-      date: '2024-01-20',
-      images: ['https://images.pexels.com/photos/1108925/pexels-photo-1108925.jpeg?auto=compress&cs=tinysrgb&w=400'],
-    },
-    {
-      id: '2',
-      title: 'Community Training Session',
-      content: 'Local volunteers completed their well maintenance training. This ensures long-term sustainability of our water systems.',
-      date: '2024-01-18',
-      images: [],
-    },
-  ];
+  const getDaysLeft = (endDate: string) => {
+    const end = new Date(endDate);
+    const now = new Date();
+    const diffTime = end.getTime() - now.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return Math.max(0, diffDays);
+  };
+
+  const daysLeft = getDaysLeft(campaign.end_date);
 
   const tabs = [
     { id: 'story', label: 'Story', icon: MessageCircle },
@@ -116,7 +89,7 @@ const CampaignDetailPage = () => {
             {/* Hero Image */}
             <div className="relative mb-6">
               <img
-                src={campaign.imageUrl}
+                src={campaign.image_url || 'https://images.pexels.com/photos/6995242/pexels-photo-6995242.jpeg?auto=compress&cs=tinysrgb&w=1200'}
                 alt={campaign.title}
                 className="w-full h-64 md:h-80 object-cover rounded-lg"
               />
@@ -124,7 +97,7 @@ const CampaignDetailPage = () => {
                 <span className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300 px-3 py-1 rounded-full text-sm font-medium">
                   {campaign.category}
                 </span>
-                {campaign.verified && (
+                {campaign.verification_status === 'verified' && (
                   <div className="bg-blue-600 rounded-full p-1">
                     <Verified className="h-4 w-4 text-white" />
                   </div>
@@ -145,26 +118,26 @@ const CampaignDetailPage = () => {
                 </div>
                 <div className="flex items-center">
                   <Calendar className="h-4 w-4 mr-1" />
-                  <span>{campaign.daysLeft} days left</span>
+                  <span>{daysLeft} days left</span>
                 </div>
                 <div className="flex items-center">
                   <Users className="h-4 w-4 mr-1" />
-                  <span>{campaign.donorCount} donors</span>
+                  <span>{donorCount} donors</span>
                 </div>
               </div>
 
               <div className="flex items-center space-x-4 mb-6">
                 <img
-                  src={campaign.creator.avatar}
-                  alt={campaign.creator.name}
+                  src={campaign.users.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(campaign.users.full_name)}&background=10b981&color=fff`}
+                  alt={campaign.users.full_name}
                   className="w-12 h-12 rounded-full"
                 />
                 <div>
                   <div className="flex items-center">
                     <span className="font-semibold text-gray-900 dark:text-white">
-                      {campaign.creator.name}
+                      {campaign.users.full_name}
                     </span>
-                    {campaign.creator.verified && (
+                    {campaign.users.verification_status === 'verified' && (
                       <Verified className="h-4 w-4 text-blue-600 ml-1" />
                     )}
                   </div>
@@ -199,56 +172,22 @@ const CampaignDetailPage = () => {
             <div className="bg-white dark:bg-gray-800 rounded-lg p-6">
               {activeTab === 'story' && (
                 <div className="prose dark:prose-invert max-w-none">
-                  <div dangerouslySetInnerHTML={{ __html: campaign.fullStory }} />
-                  
-                  <div className="mt-8">
-                    <h4 className="text-lg font-semibold mb-4">Campaign Images</h4>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      {campaign.images.map((image, index) => (
-                        <img
-                          key={index}
-                          src={image}
-                          alt={`Campaign image ${index + 1}`}
-                          className="w-full h-32 object-cover rounded-lg"
-                        />
-                      ))}
-                    </div>
+                  <div className="whitespace-pre-wrap text-gray-700 dark:text-gray-300">
+                    {campaign.story}
                   </div>
                 </div>
               )}
 
               {activeTab === 'updates' && (
-                <div className="space-y-6">
-                  {updates.map((update) => (
-                    <div key={update.id} className="border-b border-gray-200 dark:border-gray-700 pb-6 last:border-b-0">
-                      <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-                        {update.title}
-                      </h3>
-                      <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
-                        {new Date(update.date).toLocaleDateString()}
-                      </p>
-                      <p className="text-gray-700 dark:text-gray-300 mb-4">
-                        {update.content}
-                      </p>
-                      {update.images.length > 0 && (
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          {update.images.map((image, index) => (
-                            <img
-                              key={index}
-                              src={image}
-                              alt={`Update image ${index + 1}`}
-                              className="w-full h-32 object-cover rounded-lg"
-                            />
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  ))}
+                <div className="text-center py-8">
+                  <p className="text-gray-600 dark:text-gray-300">
+                    No updates yet. Check back later for campaign updates!
+                  </p>
                 </div>
               )}
 
-              {activeTab === 'donors' && <DonorWall />}
-              {activeTab === 'comments' && <CommentSection />}
+              {activeTab === 'donors' && <DonorWall campaignId={campaign.id} />}
+              {activeTab === 'comments' && <CommentSection campaignId={campaign.id} />}
             </div>
           </div>
 
@@ -271,15 +210,15 @@ const CampaignDetailPage = () => {
                   <div className="flex justify-between items-end mb-4">
                     <div>
                       <div className="text-2xl font-bold text-gray-900 dark:text-white">
-                        {formatCurrency(campaign.raised)}
+                        {formatCurrency(campaign.current_amount)}
                       </div>
                       <div className="text-sm text-gray-600 dark:text-gray-300">
-                        raised of {formatCurrency(campaign.goal)} goal
+                        raised of {formatCurrency(campaign.goal_amount)} goal
                       </div>
                     </div>
                     <div className="text-right">
                       <div className="text-lg font-semibold text-gray-900 dark:text-white">
-                        {campaign.donorCount}
+                        {donorCount}
                       </div>
                       <div className="text-sm text-gray-600 dark:text-gray-300">
                         donors

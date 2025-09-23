@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { Search, Filter, Grid, List } from 'lucide-react';
 import CampaignCard from '../components/campaigns/CampaignCard';
+import LoadingSpinner from '../components/ui/LoadingSpinner';
+import { useCampaigns } from '../hooks/useCampaigns';
 
 const CampaignsPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -8,16 +10,14 @@ const CampaignsPage = () => {
   const [sortBy, setSortBy] = useState('trending');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-KE', {
-      style: 'currency',
-      currency: 'KES',
-      minimumFractionDigits: 0,
-    }).format(amount);
-  };
+  const { campaigns, loading, error } = useCampaigns({
+    category: selectedCategory,
+    search: searchTerm,
+  });
 
   const categories = [
-    'All', 'Medical', 'Education', 'Community', 'Emergency', 'Environment', 'Animals'
+    'All', 'Medical', 'Education', 'Community', 'Emergency', 'Environment', 
+    'Animals', 'Sports', 'Technology', 'Arts', 'Religious'
   ];
 
   const sortOptions = [
@@ -28,93 +28,20 @@ const CampaignsPage = () => {
     { value: 'goal-amount', label: 'Goal Amount' },
   ];
 
-  const campaigns = [
-    {
-      id: '1',
-      title: 'Help Build Clean Water Wells in Rural Kenya',
-      description: 'Providing clean water access to over 500 families in remote villages across Kenya. This project will drill 5 new wells and provide maintenance training to local communities.',
-      imageUrl: 'https://images.pexels.com/photos/1090638/pexels-photo-1090638.jpeg?auto=compress&cs=tinysrgb&w=800',
-      raised: 1542000,
-      goal: 2500000,
-      donorCount: 89,
-      daysLeft: 12,
-      category: 'Community',
-      verified: true,
-      location: 'Kenya',
-    },
-    {
-      id: '2',
-      title: 'Emergency Surgery Fund for Baby Sarah',
-      description: 'Help save baby Sarah who needs urgent heart surgery. She was born with a congenital heart defect and needs immediate medical intervention.',
-      imageUrl: 'https://images.pexels.com/photos/3845457/pexels-photo-3845457.jpeg?auto=compress&cs=tinysrgb&w=800',
-      raised: 895000,
-      goal: 1200000,
-      donorCount: 67,
-      daysLeft: 5,
-      category: 'Medical',
-      verified: true,
-      location: 'USA',
-    },
-    {
-      id: '3',
-      title: 'School Books for Underprivileged Children',
-      description: 'Providing educational resources to 200 children in underserved areas. Books, supplies, and learning materials for a better future.',
-      imageUrl: 'https://images.pexels.com/photos/159675/love-school-learn-book-159675.jpeg?auto=compress&cs=tinysrgb&w=800',
-      raised: 320000,
-      goal: 800000,
-      donorCount: 42,
-      daysLeft: 18,
-      category: 'Education',
-      verified: false,
-      location: 'Philippines',
-    },
-    {
-      id: '4',
-      title: 'Wildfire Relief for Displaced Families',
-      description: 'Supporting families who lost their homes in recent wildfires. Providing temporary housing, food, and essential supplies.',
-      imageUrl: 'https://images.pexels.com/photos/1112080/pexels-photo-1112080.jpeg?auto=compress&cs=tinysrgb&w=800',
-      raised: 2250000,
-      goal: 3500000,
-      donorCount: 156,
-      daysLeft: 8,
-      category: 'Emergency',
-      verified: true,
-      location: 'Australia',
-    },
-    {
-      id: '5',
-      title: 'Save the Coral Reef Initiative',
-      description: 'Marine conservation project to restore coral reefs and protect marine biodiversity for future generations.',
-      imageUrl: 'https://images.pexels.com/photos/1022923/pexels-photo-1022923.jpeg?auto=compress&cs=tinysrgb&w=800',
-      raised: 780000,
-      goal: 2000000,
-      donorCount: 98,
-      daysLeft: 25,
-      category: 'Environment',
-      verified: true,
-      location: 'Maldives',
-    },
-    {
-      id: '6',
-      title: 'Animal Shelter Expansion Project',
-      description: 'Help us expand our animal shelter to accommodate more rescued animals and provide better care facilities.',
-      imageUrl: 'https://images.pexels.com/photos/1805164/pexels-photo-1805164.jpeg?auto=compress&cs=tinysrgb&w=800',
-      raised: 1230000,
-      goal: 1800000,
-      donorCount: 134,
-      daysLeft: 15,
-      category: 'Animals',
-      verified: false,
-      location: 'Canada',
-    },
-  ];
-
-  const filteredCampaigns = campaigns.filter(campaign => {
-    const matchesSearch = campaign.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         campaign.description.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = selectedCategory === 'All' || campaign.category === selectedCategory;
-    return matchesSearch && matchesCategory;
-  });
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center">
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+              Error Loading Campaigns
+            </h2>
+            <p className="text-gray-600 dark:text-gray-300">{error}</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
@@ -194,22 +121,14 @@ const CampaignsPage = () => {
         {/* Results */}
         <div className="mb-6">
           <p className="text-gray-600 dark:text-gray-300">
-            Showing {filteredCampaigns.length} campaigns
+            {loading ? 'Loading campaigns...' : `Showing ${campaigns.length} campaigns`}
           </p>
         </div>
 
         {/* Campaign Grid/List */}
-        <div className={
-          viewMode === 'grid'
-            ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8'
-            : 'space-y-6'
-        }>
-          {filteredCampaigns.map((campaign) => (
-            <CampaignCard key={campaign.id} campaign={campaign} />
-          ))}
-        </div>
-
-        {filteredCampaigns.length === 0 && (
+        {loading ? (
+          <LoadingSpinner />
+        ) : campaigns.length === 0 ? (
           <div className="text-center py-12">
             <div className="text-gray-400 dark:text-gray-600 text-6xl mb-4">
               🔍
@@ -220,6 +139,16 @@ const CampaignsPage = () => {
             <p className="text-gray-600 dark:text-gray-300">
               Try adjusting your search or filter criteria.
             </p>
+          </div>
+        ) : (
+          <div className={
+            viewMode === 'grid'
+              ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8'
+              : 'space-y-6'
+          }>
+            {campaigns.map((campaign) => (
+              <CampaignCard key={campaign.id} campaign={campaign} />
+            ))}
           </div>
         )}
       </div>
