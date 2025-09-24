@@ -6,7 +6,7 @@ const StreakTracker = () => {
   const { user } = useAuth();
   
   const streakData = {
-    current: user?.streakCount || 0,
+    current: 7, // This would come from user engagement data
     best: 15,
     thisMonth: 7,
     goal: 30,
