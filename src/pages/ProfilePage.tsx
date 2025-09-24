@@ -95,7 +95,7 @@ const ProfilePage = () => {
                 <div className="relative inline-block">
                   <div className="w-24 h-24 bg-gradient-to-r from-emerald-500 to-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
                     <span className="text-2xl font-bold text-white">
-                      {user.name.charAt(0)}
+                      {user.full_name.charAt(0)}
                     </span>
                   </div>
                   <div className="absolute -bottom-1 -right-1 bg-emerald-500 rounded-full p-2">
@@ -103,7 +103,7 @@ const ProfilePage = () => {
                   </div>
                 </div>
                 <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-                  {user.name}
+                  {user.full_name}
                 </h1>
                 <p className="text-gray-600 dark:text-gray-300 mb-4">
                   {user.email}
@@ -137,7 +137,7 @@ const ProfilePage = () => {
                   </div>
                   <div className="text-center p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
                     <div className="text-2xl font-bold text-gray-900 dark:text-white">
-                      {user.streakCount}
+                      7
                     </div>
                     <div className="text-sm text-gray-600 dark:text-gray-300">
                       Current Streak
@@ -151,7 +151,7 @@ const ProfilePage = () => {
                     Your Badges
                   </h3>
                   <div className="flex flex-wrap gap-2 justify-center">
-                    {user.badges.map((badge, index) => (
+                    {['First Donation', 'Helper', 'Supporter'].map((badge, index) => (
                       <span
                         key={index}
                         className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-300"

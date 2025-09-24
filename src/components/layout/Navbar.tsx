@@ -6,7 +6,7 @@ import { useTheme } from '../../contexts/ThemeContext';
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const { user, logout } = useAuth();
+  const { user, logout, isAdmin } = useAuth();
   const { isDark, toggleTheme } = useTheme();
 
   return (
@@ -60,13 +60,21 @@ const Navbar = () => {
                 <button className="p-2 text-gray-700 dark:text-gray-200 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">
                   <Bell className="h-5 w-5" />
                 </button>
+                {isAdmin && (
+                  <Link
+                    to="/admin"
+                    className="text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 transition-colors font-medium"
+                  >
+                    Admin Dashboard
+                  </Link>
+                )}
                 <div className="flex items-center space-x-2">
                   <Link
                     to="/profile"
                     className="flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                   >
                     <User className="h-5 w-5 text-gray-700 dark:text-gray-200" />
-                    <span className="text-gray-700 dark:text-gray-200">{user.name}</span>
+                    <span className="text-gray-700 dark:text-gray-200">{user.full_name}</span>
                   </Link>
                   <button
                     onClick={logout}

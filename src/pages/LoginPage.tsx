@@ -1,8 +1,7 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { Eye, EyeOff, Heart, Mail, Lock, Smartphone, ArrowRight } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { Eye, EyeOff, Heart, Mail, Lock, ArrowRight } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
-import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 
 const LoginPage = () => {
@@ -10,26 +9,36 @@ const LoginPage = () => {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [loginMethod, setLoginMethod] = useState<'email' | 'phone'>('email');
-  const [phoneNumber, setPhoneNumber] = useState('');
 
-  const { login, loginWithGoogle } = useAuth();
+  const { login, loginWithGoogle, user, isAdmin } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // Get the intended destination from location state
+  const from = location.state?.from?.pathname || '/';
+
+  useEffect(() => {
+    // If user is already logged in, redirect them
+    if (user) {
+      if (isAdmin) {
+        navigate('/admin');
+      } else {
+        navigate(from);
+      }
+    }
+  }, [user, isAdmin, navigate, from]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
     try {
-      if (loginMethod === 'email') {
-        await login(email, password);
-      } else {
-        await login(phoneNumber, password);
-      }
+      await login(email, password);
       toast.success('Welcome back!');
-      navigate('/');
-    } catch (error) {
-      toast.error('Login failed. Please check your credentials.');
+      
+      // Navigation will be handled by the useEffect above
+    } catch (error: any) {
+      toast.error(error.message || 'Login failed. Please check your credentials.');
     } finally {
       setIsLoading(false);
     }
@@ -39,32 +48,8 @@ const LoginPage = () => {
     try {
       await loginWithGoogle();
       toast.success('Welcome back!');
-      navigate('/');
-    } catch (error) {
-      toast.error('Google login failed.');
-    }
-  };
-
-  const handleDemoLogin = async (role: 'user' | 'admin') => {
-    setIsLoading(true);
-    try {
-      if (role === 'admin') {
-        setEmail('admin@fundrise.com');
-        setPassword('admin123');
-        await login('admin@fundrise.com', 'admin123');
-        toast.success('Welcome Admin!');
-        navigate('/admin');
-      } else {
-        setEmail('demo@fundrise.com');
-        setPassword('demo123');
-        await login('demo@fundrise.com', 'demo123');
-        toast.success('Welcome!');
-        navigate('/');
-      }
-    } catch (error) {
-      toast.error('Demo login failed.');
-    } finally {
-      setIsLoading(false);
+    } catch (error: any) {
+      toast.error(error.message || 'Google login failed.');
     }
   };
 
@@ -86,114 +71,26 @@ const LoginPage = () => {
 
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-white dark:bg-gray-800 py-10 px-8 shadow-2xl sm:rounded-2xl border border-gray-100 dark:border-gray-700">
-          {/* Demo Login Buttons */}
-          <div className="mb-8">
-            <div className="text-center mb-4">
-              <span className="text-sm font-medium text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 px-3 py-1 rounded-full">
-                Quick Demo Access
-              </span>
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              <button
-                onClick={() => handleDemoLogin('user')}
-                disabled={isLoading}
-                className="flex items-center justify-center px-4 py-3 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 transition-all duration-200 font-medium shadow-lg hover:shadow-xl disabled:opacity-50"
-              >
-                <ArrowRight className="h-4 w-4 mr-2" />
-                Demo User
-              </button>
-              <button
-                onClick={() => handleDemoLogin('admin')}
-                disabled={isLoading}
-                className="flex items-center justify-center px-4 py-3 bg-purple-600 text-white rounded-xl hover:bg-purple-700 transition-all duration-200 font-medium shadow-lg hover:shadow-xl disabled:opacity-50"
-              >
-                <ArrowRight className="h-4 w-4 mr-2" />
-                Admin Panel
-              </button>
-            </div>
-          </div>
-
-          <div className="relative mb-8">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-gray-200 dark:border-gray-600" />
-            </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="px-4 bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400">
-                Or sign in with your account
-              </span>
-            </div>
-          </div>
-
-          {/* Login Method Toggle */}
-          <div className="mb-6">
-            <div className="flex bg-gray-100 dark:bg-gray-700 rounded-xl p-1">
-              <button
-                onClick={() => setLoginMethod('email')}
-                className={`flex-1 px-4 py-3 text-sm font-medium rounded-lg transition-all duration-200 ${
-                  loginMethod === 'email'
-                    ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-md'
-                    : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white'
-                }`}
-              >
-                <Mail className="h-4 w-4 inline mr-2" />
-                Email
-              </button>
-              <button
-                onClick={() => setLoginMethod('phone')}
-                className={`flex-1 px-4 py-3 text-sm font-medium rounded-lg transition-all duration-200 ${
-                  loginMethod === 'phone'
-                    ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-md'
-                    : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white'
-                }`}
-              >
-                <Smartphone className="h-4 w-4 inline mr-2" />
-                Phone/M-Pesa
-              </button>
-            </div>
-          </div>
-
           <form className="space-y-6" onSubmit={handleSubmit}>
-            {loginMethod === 'email' ? (
-              <div>
-                <label htmlFor="email" className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                  Email address
-                </label>
-                <div className="relative">
-                  <input
-                    id="email"
-                    name="email"
-                    type="email"
-                    autoComplete="email"
-                    required
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="appearance-none block w-full px-4 py-4 pl-12 border border-gray-300 dark:border-gray-600 rounded-xl placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-all duration-200"
-                    placeholder="Enter your email"
-                  />
-                  <Mail className="h-5 w-5 text-gray-400 absolute left-4 top-4.5" />
-                </div>
+            <div>
+              <label htmlFor="email" className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                Email address
+              </label>
+              <div className="relative">
+                <input
+                  id="email"
+                  name="email"
+                  type="email"
+                  autoComplete="email"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="appearance-none block w-full px-4 py-4 pl-12 border border-gray-300 dark:border-gray-600 rounded-xl placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-all duration-200"
+                  placeholder="Enter your email"
+                />
+                <Mail className="h-5 w-5 text-gray-400 absolute left-4 top-4.5" />
               </div>
-            ) : (
-              <div>
-                <label htmlFor="phone" className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                  Phone number / M-Pesa number
-                </label>
-                <div className="relative">
-                  <input
-                    id="phone"
-                    name="phone"
-                    type="tel"
-                    autoComplete="tel"
-                    required
-                    value={phoneNumber}
-                    onChange={(e) => setPhoneNumber(e.target.value)}
-                    className="appearance-none block w-full px-4 py-4 pl-12 border border-gray-300 dark:border-gray-600 rounded-xl placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-all duration-200"
-                    placeholder="+254700000000"
-                  />
-                  <Smartphone className="h-5 w-5 text-gray-400 absolute left-4 top-4.5" />
-                </div>
-              </div>
-            )}
+            </div>
 
             <div>
               <label htmlFor="password" className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
