@@ -1,8 +1,7 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { Eye, EyeOff, Heart, Mail, Lock, User, Check, ArrowRight } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Eye, EyeOff, Heart, Mail, Lock, User, Check, ArrowRight, AlertCircle } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
-import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 
 const RegisterPage = () => {
@@ -16,9 +15,21 @@ const RegisterPage = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [agreedToTerms, setAgreedToTerms] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const { register, loginWithGoogle } = useAuth();
+  const { register, loginWithGoogle, user, isAdmin } = useAuth();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    // If user is already logged in, redirect them
+    if (user) {
+      if (isAdmin) {
+        navigate('/admin');
+      } else {
+        navigate('/');
+      }
+    }
+  }, [user, isAdmin, navigate]);
 
   const passwordRequirements = [
     { label: 'At least 8 characters', test: (pwd: string) => pwd.length >= 8 },
@@ -32,35 +43,81 @@ const RegisterPage = () => {
       ...formData,
       [e.target.name]: e.target.value,
     });
+    // Clear error when user starts typing
+    if (error) setError(null);
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
+  const validateForm = () => {
+    if (!formData.name.trim()) {
+      setError('Full name is required');
+      return false;
+    }
+
+    if (!formData.email.trim()) {
+      setError('Email is required');
+      return false;
+    }
+
+    if (!/\S+@\S+\.\S+/.test(formData.email)) {
+      setError('Please enter a valid email address');
+      return false;
+    }
+
     if (formData.password !== formData.confirmPassword) {
-      toast.error('Passwords do not match');
-      return;
+      setError('Passwords do not match');
+      return false;
     }
 
     if (!agreedToTerms) {
-      toast.error('Please agree to the terms and conditions');
-      return;
+      setError('Please agree to the terms and conditions');
+      return false;
     }
 
     const failedRequirements = passwordRequirements.filter(req => !req.test(formData.password));
     if (failedRequirements.length > 0) {
-      toast.error('Password does not meet requirements');
+      setError('Password does not meet all requirements');
+      return false;
+    }
+
+    return true;
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    
+    if (!validateForm()) {
       return;
     }
 
     setIsLoading(true);
 
     try {
-      await register(formData.email, formData.password, formData.name);
+      await register(formData.email.trim(), formData.password, formData.name.trim());
       toast.success('Welcome to FundRise! 🎉');
-      navigate('/');
-    } catch (error) {
-      toast.error('Registration failed. Please try again.');
+      
+      // Navigation will be handled by the useEffect above
+    } catch (error: any) {
+      console.error('Registration error:', error);
+      
+      let errorMessage = 'Registration failed. Please try again.';
+      
+      if (error.message) {
+        if (error.message.includes('User already registered')) {
+          errorMessage = 'An account with this email already exists. Please try logging in instead.';
+        } else if (error.message.includes('Password should be at least 6 characters')) {
+          errorMessage = 'Password must be at least 6 characters long.';
+        } else if (error.message.includes('Invalid email')) {
+          errorMessage = 'Please enter a valid email address.';
+        } else if (error.message.includes('Signup is disabled')) {
+          errorMessage = 'Account registration is currently disabled. Please contact support.';
+        } else {
+          errorMessage = error.message;
+        }
+      }
+      
+      setError(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -68,11 +125,14 @@ const RegisterPage = () => {
 
   const handleGoogleRegister = async () => {
     try {
+      setError(null);
       await loginWithGoogle();
-      toast.success('Welcome to FundRise! 🎉');
-      navigate('/');
-    } catch (error) {
-      toast.error('Google signup failed.');
+      toast.success('Redirecting to Google...');
+    } catch (error: any) {
+      console.error('Google signup error:', error);
+      const errorMessage = error.message || 'Google signup failed. Please try again.';
+      setError(errorMessage);
+      toast.error(errorMessage);
     }
   };
 
@@ -94,6 +154,15 @@ const RegisterPage = () => {
 
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-white dark:bg-gray-800 py-10 px-8 shadow-2xl sm:rounded-2xl border border-gray-100 dark:border-gray-700">
+          {error && (
+            <div className="mb-6 p-4 bg-red-50 dark:bg-red-900 border border-red-200 dark:border-red-700 rounded-lg">
+              <div className="flex items-center">
+                <AlertCircle className="h-5 w-5 text-red-600 dark:text-red-400 mr-2" />
+                <p className="text-sm text-red-700 dark:text-red-300">{error}</p>
+              </div>
+            </div>
+          )}
+
           <form className="space-y-6" onSubmit={handleSubmit}>
             <div>
               <label htmlFor="name" className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
