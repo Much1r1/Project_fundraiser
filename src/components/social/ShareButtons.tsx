@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Share2, MessageCircle, Instagram, Twitter, QrCode, Copy, Check } from 'lucide-react';
-import { QRCode } from 'qrcode.react';
+import QRCode from 'qrcode.react';
 
 interface ShareButtonsProps {
   title: string;
