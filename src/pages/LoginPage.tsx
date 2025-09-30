@@ -109,6 +109,16 @@ const LoginPage = () => {
             </div>
           )}
 
+          {/* Admin Login Instructions */}
+          <div className="mb-6 p-4 bg-blue-50 dark:bg-blue-900 border border-blue-200 dark:border-blue-700 rounded-lg">
+            <div className="text-sm text-blue-700 dark:text-blue-300">
+              <p className="font-semibold mb-2">🔑 Admin Access:</p>
+              <p className="mb-1">Email: <code className="bg-blue-100 dark:bg-blue-800 px-1 rounded">admin@fundrise.com</code></p>
+              <p>Password: <code className="bg-blue-100 dark:bg-blue-800 px-1 rounded">admin123456</code></p>
+              <p className="text-xs mt-2 opacity-75">Register with this email to get admin access</p>
+            </div>
+          </div>
+
           <form className="space-y-6" onSubmit={handleSubmit}>
             <div>
               <label htmlFor="email" className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">

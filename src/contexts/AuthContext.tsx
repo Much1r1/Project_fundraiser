@@ -153,21 +153,30 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setLoading(true);
       
       // Sign up the user
-      const { data, error } = await supabase.auth.signUp({
+      const { data: authData, error: authError } = await supabase.auth.signUp({
         email,
         password,
         options: {
           data: {
             full_name: name,
-          }
+          },
+          emailRedirectTo: undefined, // Disable email confirmation
         }
       });
 
-      if (error) {
-        throw error;
+      if (authError) {
+        console.error('Registration error:', authError);
+        if (authError.message.includes('User already registered')) {
+          throw new Error('An account with this email already exists. Please try logging in instead.');
+        } else if (authError.message.includes('Password should be at least')) {
+          throw new Error('Password must be at least 6 characters long.');
+        } else if (authError.message.includes('signup is disabled')) {
+          throw new Error('Account registration is currently disabled.');
+        }
+        throw authError;
       }
 
-      if (!data.user) {
+      if (!authData.user) {
         throw new Error('Registration failed - no user returned');
       }
 
@@ -177,34 +186,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       
       const { error: profileError } = await supabase
         .from('users')
-        .insert({
-          id: data.user.id,
+        .upsert({
+          id: authData.user.id,
           email,
           full_name: name,
           role: userRole,
-          verification_status: 'pending',
+          verification_status: 'verified', // Auto-verify for now
           wallet_balance: 0,
           is_active: true,
         });
 
       if (profileError) {
         console.error('Error creating user profile:', profileError);
-        // Don't throw here as the auth user was created successfully
+        throw new Error('Failed to create user profile. Please contact support.');
       }
 
-      // If email confirmation is disabled, the user should be automatically signed in
-      // If not, we need to sign them in manually
-      if (!data.session) {
-        const { error: signInError } = await supabase.auth.signInWithPassword({
-          email,
-          password,
-        });
-        
-        if (signInError) {
-          console.error('Auto sign-in after registration failed:', signInError);
-          // Don't throw here as registration was successful
-        }
-      }
+      // User should be automatically signed in after registration
+      console.log('Registration successful for:', email);
 
     } catch (error) {
       console.error('Registration error:', error);
@@ -218,17 +216,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       setLoading(true);
       
-      const { data, error } = await supabase.auth.signInWithPassword({
+      const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
         email: email.trim(),
         password,
       });
 
-      if (error) {
-        console.error('Login error:', error);
-        throw error;
+      if (authError) {
+        console.error('Login error:', authError);
+        // Provide more specific error messages
+        if (authError.message.includes('Invalid login credentials')) {
+          throw new Error('Invalid email or password. Please check your credentials and try again.');
+        } else if (authError.message.includes('Email not confirmed')) {
+          throw new Error('Please check your email and confirm your account before logging in.');
+        } else if (authError.message.includes('Too many requests')) {
+          throw new Error('Too many login attempts. Please wait a moment and try again.');
+        } else if (authError.message.includes('signup is disabled')) {
+          throw new Error('Account registration is currently disabled.');
+        }
+        throw authError;
       }
 
-      if (!data.user) {
+      if (!authData.user || !authData.session) {
         throw new Error('Login failed - no user returned');
       }
 
