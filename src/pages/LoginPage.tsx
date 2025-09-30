@@ -110,12 +110,13 @@ const LoginPage = () => {
           )}
 
           {/* Admin Login Instructions */}
-          <div className="mb-6 p-4 bg-blue-50 dark:bg-blue-900 border border-blue-200 dark:border-blue-700 rounded-lg">
-            <div className="text-sm text-blue-700 dark:text-blue-300">
-              <p className="font-semibold mb-2">🔑 Admin Access:</p>
-              <p className="mb-1">Email: <code className="bg-blue-100 dark:bg-blue-800 px-1 rounded">admin@fundrise.com</code></p>
-              <p>Password: <code className="bg-blue-100 dark:bg-blue-800 px-1 rounded">admin123456</code></p>
-              <p className="text-xs mt-2 opacity-75">Register with this email to get admin access</p>
+          <div className="mb-6 p-4 bg-amber-50 dark:bg-amber-900 border border-amber-200 dark:border-amber-700 rounded-lg">
+            <div className="text-sm text-amber-700 dark:text-amber-300">
+              <p className="font-semibold mb-2">⚠️ First Time Setup:</p>
+              <p className="mb-1">1. First <strong>REGISTER</strong> (not login) with:</p>
+              <p className="mb-1">Email: <code className="bg-amber-100 dark:bg-amber-800 px-1 rounded">admin@fundrise.com</code></p>
+              <p className="mb-1">Password: <code className="bg-amber-100 dark:bg-amber-800 px-1 rounded">admin123456</code></p>
+              <p className="text-xs mt-2 opacity-75">2. Then you can login normally. Registration creates the account first.</p>
             </div>
           </div>
 

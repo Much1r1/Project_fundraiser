@@ -152,6 +152,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       setLoading(true);
       
+      console.log('Attempting registration with:', { email: email.trim(), name });
+      
       // Sign up the user
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email,
@@ -160,26 +162,34 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           data: {
             full_name: name,
           },
-          emailRedirectTo: undefined, // Disable email confirmation
+          emailRedirectTo: undefined,
         }
       });
 
       if (authError) {
-        console.error('Registration error:', authError);
+        console.error('Supabase registration error:', authError);
+        console.error('Error code:', authError.status);
+        console.error('Error message:', authError.message);
+        
         if (authError.message.includes('User already registered')) {
           throw new Error('An account with this email already exists. Please try logging in instead.');
         } else if (authError.message.includes('Password should be at least')) {
           throw new Error('Password must be at least 6 characters long.');
-        } else if (authError.message.includes('signup is disabled')) {
+        } else if (authError.message.includes('signup_disabled')) {
           throw new Error('Account registration is currently disabled.');
+        } else if (authError.message.includes('email_address_invalid')) {
+          throw new Error('Please enter a valid email address.');
         }
         throw authError;
       }
 
       if (!authData.user) {
+        console.error('No user returned from registration');
         throw new Error('Registration failed - no user returned');
       }
 
+      console.log('Registration successful:', authData.user.email);
+      
       // Create user profile immediately
       const adminEmails = getAdminEmails();
       const userRole = adminEmails.includes(email.toLowerCase()) ? 'admin' : 'user';
@@ -197,12 +207,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         });
 
       if (profileError) {
-        console.error('Error creating user profile:', profileError);
+        console.error('Profile creation error:', profileError);
         throw new Error('Failed to create user profile. Please contact support.');
       }
 
+      console.log('Profile created successfully');
       // User should be automatically signed in after registration
-      console.log('Registration successful for:', email);
 
     } catch (error) {
       console.error('Registration error:', error);
@@ -216,30 +226,43 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       setLoading(true);
       
+      console.log('Attempting login with:', { email: email.trim() });
+      
       const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
         email: email.trim(),
         password,
       });
 
       if (authError) {
-        console.error('Login error:', authError);
+        console.error('Supabase auth error:', authError);
+        console.error('Error code:', authError.status);
+        console.error('Error message:', authError.message);
+        
         // Provide more specific error messages
-        if (authError.message.includes('Invalid login credentials')) {
+        if (authError.message.includes('Invalid login credentials') || authError.message.includes('invalid_credentials')) {
           throw new Error('Invalid email or password. Please check your credentials and try again.');
+        } else if (authError.message.includes('Email not confirmed')) {
+          throw new Error('Please check your email and confirm your account before logging in.');
+        } else if (authError.message.includes('signup_disabled')) {
+          throw new Error('Account registration is currently disabled.');
+        } else if (authError.message.includes('email_address_invalid')) {
+          throw new Error('Please enter a valid email address.');
+        } else if (authError.message.includes('password_too_short')) {
+          throw new Error('Password must be at least 6 characters long.');
         } else if (authError.message.includes('Email not confirmed')) {
           throw new Error('Please check your email and confirm your account before logging in.');
         } else if (authError.message.includes('Too many requests')) {
           throw new Error('Too many login attempts. Please wait a moment and try again.');
-        } else if (authError.message.includes('signup is disabled')) {
-          throw new Error('Account registration is currently disabled.');
         }
         throw authError;
       }
 
       if (!authData.user || !authData.session) {
+        console.error('No user or session returned from Supabase');
         throw new Error('Login failed - no user returned');
       }
 
+      console.log('Login successful:', authData.user.email);
       // The auth state change listener will handle fetching the profile
       
     } catch (error) {
