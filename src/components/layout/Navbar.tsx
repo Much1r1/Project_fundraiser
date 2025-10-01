@@ -68,21 +68,7 @@ const Navbar = () => {
                     Admin Dashboard
                   </Link>
                 )}
-                <div className="flex items-center space-x-2">
-                  <Link
-                    to="/profile"
-                    className="flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-                  >
-                    <User className="h-5 w-5 text-gray-700 dark:text-gray-200" />
-                    <span className="text-gray-700 dark:text-gray-200">{user.full_name}</span>
-                  </Link>
-                  <button
-                    onClick={logout}
-                    className="text-gray-700 dark:text-gray-200 hover:text-red-600 dark:hover:text-red-400 transition-colors"
-                  >
-                    Logout
-                  </button>
-                </div>
+                <UserDropdown user={user} onLogout={logout} />
               </>
             ) : (
               <div className="flex items-center space-x-2">
