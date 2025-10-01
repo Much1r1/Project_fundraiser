@@ -1,12 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { 
-  User, Settings, Download, Heart, Calendar, Award, 
-  TrendingUp, DollarSign, FileText, Bell, Shield, 
-  Eye, EyeOff, Camera, Edit3, Save, X, Check,
-  Target, Users, MapPin, Clock, Star, Trophy,
-  CreditCard, Smartphone, Lock, Mail, Phone
-} from 'lucide-react';
+import { User, Settings, Download, Heart, Calendar, Award, TrendingUp, DollarSign, FileText, Bell, Shield, Eye, EyeOff, Camera, CreditCard as Edit3, Save, X, Check, Target, Users, MapPin, Clock, Star, Trophy, CreditCard, Smartphone, Lock, Mail, Phone } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import StreakTracker from '../components/gamification/StreakTracker';
 import { supabase } from '../lib/supabase';
