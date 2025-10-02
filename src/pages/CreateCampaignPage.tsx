@@ -263,13 +263,10 @@ const CreateCampaignPage = () => {
                     <button
                       type="button"
                       onClick={() => removeImage(index)}
-                    {user ? 'Ready to launch?' : 'Ready to save and publish?'}
+                      className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
                     >
                       <X className="h-4 w-4" />
-                    {user 
-                      ? 'Your campaign will be reviewed before going live. This usually takes 1-2 business days.'
-                      : 'You\'ll need to log in to save your campaign for admin review.'
-                    }
+                    </button>
                   </div>
                 ))}
                 
@@ -334,14 +331,12 @@ const CreateCampaignPage = () => {
             <div className="space-y-4">
               <div className="flex flex-wrap gap-2">
                 {tags.map((tag) => (
-                  {user && (
+                  <span
+                    key={tag}
+                    className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-emerald-100 dark:bg-emerald-900 text-emerald-800 dark:text-emerald-200"
+                  >
+                    {tag}
                     <button
-                      type="button"
-                      className="px-6 py-3 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
-                    >
-                      Save as Draft
-                    </button>
-                  )}
                       type="button"
                       onClick={() => removeTag(tag)}
                       className="ml-2 text-emerald-600 dark:text-emerald-400 hover:text-emerald-800 dark:hover:text-emerald-200"
@@ -383,20 +378,25 @@ const CreateCampaignPage = () => {
             <div className="flex flex-col sm:flex-row gap-4 justify-between items-start">
               <div>
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                  Ready to launch?
+                  {user ? 'Ready to launch?' : 'Ready to save and publish?'}
                 </h3>
                 <p className="text-gray-600 dark:text-gray-300">
-                  Your campaign will be reviewed before going live. This usually takes 1-2 business days.
+                  {user 
+                    ? 'Your campaign will be reviewed before going live. This usually takes 1-2 business days.'
+                    : 'You\'ll need to log in to save your campaign for admin review.'
+                  }
                 </p>
               </div>
               
               <div className="flex flex-col sm:flex-row gap-4">
-                <button
-                  type="button"
-                  className="px-6 py-3 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
-                >
-                  Save as Draft
-                </button>
+                {user && (
+                  <button
+                    type="button"
+                    className="px-6 py-3 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                  >
+                    Save as Draft
+                  </button>
+                )}
                 <button
                   type="submit"
                   disabled={isSubmitting}
