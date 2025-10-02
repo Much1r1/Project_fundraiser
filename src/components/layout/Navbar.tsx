@@ -62,21 +62,15 @@ const Navbar = () => {
                 </button>
                 <Link
                   to="/profile"
-                  className="p-2 text-gray-700 dark:text-gray-200 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"
+                  className="flex items-center justify-center p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 hover:text-emerald-600 dark:hover:text-emerald-400 transition-all"
+                  title="Profile"
                 >
                   <User className="h-5 w-5" />
                 </Link>
-                {isAdmin && (
-                  <Link
-                    to="/admin"
-                    className="text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 transition-colors font-medium"
-                  >
-                    Admin Dashboard
-                  </Link>
-                )}
                 <button
                   onClick={logout}
-                  className="text-gray-700 dark:text-gray-200 hover:text-red-600 dark:hover:text-red-400 transition-colors"
+                  className="flex items-center justify-center p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 hover:text-red-600 dark:hover:text-red-400 transition-all"
+                  title="Logout"
                 >
                   <LogOut className="h-5 w-5" />
                 </button>
