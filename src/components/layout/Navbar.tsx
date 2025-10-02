@@ -60,6 +60,12 @@ const Navbar = () => {
                 <button className="p-2 text-gray-700 dark:text-gray-200 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">
                   <Bell className="h-5 w-5" />
                 </button>
+                <Link
+                  to="/profile"
+                  className="p-2 text-gray-700 dark:text-gray-200 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"
+                >
+                  <User className="h-5 w-5" />
+                </Link>
                 {isAdmin && (
                   <Link
                     to="/admin"
@@ -68,7 +74,12 @@ const Navbar = () => {
                     Admin Dashboard
                   </Link>
                 )}
-                <UserDropdown user={user} onLogout={logout} />
+                <button
+                  onClick={logout}
+                  className="text-gray-700 dark:text-gray-200 hover:text-red-600 dark:hover:text-red-400 transition-colors"
+                >
+                  <LogOut className="h-5 w-5" />
+                </button>
               </>
             ) : (
               <div className="flex items-center space-x-2">
