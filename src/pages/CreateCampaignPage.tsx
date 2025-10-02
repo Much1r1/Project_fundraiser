@@ -418,41 +418,6 @@ const CreateCampaignPage = () => {
             </div>
           </div>
         </form>
-
-        {/* Login Prompt Modal */}
-        {showLoginPrompt && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full p-6">
-              <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
-                Login Required
-              </h3>
-              <p className="text-gray-600 dark:text-gray-300 mb-6">
-                To save and publish your campaign for admin review, you need to log in or create an account.
-                Don't worry - your form data will be preserved!
-              </p>
-              <div className="flex flex-col sm:flex-row gap-3">
-                <Link
-                  to="/login"
-                  className="flex-1 bg-emerald-600 text-white py-2 px-4 rounded-lg hover:bg-emerald-700 transition-colors text-center"
-                >
-                  Login
-                </Link>
-                <Link
-                  to="/register"
-                  className="flex-1 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 py-2 px-4 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-center"
-                >
-                  Sign Up
-                </Link>
-                <button
-                  onClick={() => setShowLoginPrompt(false)}
-                  className="px-4 py-2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 transition-colors"
-                >
-                  Cancel
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );
