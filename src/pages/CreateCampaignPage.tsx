@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { Upload, X, Plus, DollarSign, Calendar, Target } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import toast from 'react-hot-toast';
+import { useAuth } from '../contexts/AuthContext';
 
 const schema = yup.object({
   title: yup.string().required('Title is required').min(10, 'Title must be at least 10 characters'),
@@ -28,9 +29,11 @@ interface CampaignForm {
 
 const CreateCampaignPage = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [images, setImages] = useState<string[]>([]);
   const [tags, setTags] = useState<string[]>([]);
   const [newTag, setNewTag] = useState('');
+  const [showLoginPrompt, setShowLoginPrompt] = useState(false);
 
   const {
     register,
@@ -50,6 +53,12 @@ const CreateCampaignPage = () => {
   const watchedTitle = watch('title');
 
   const onSubmit = async (data: CampaignForm) => {
+    // Check if user is logged in before saving
+    if (!user) {
+      setShowLoginPrompt(true);
+      return;
+    }
+
     try {
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 2000));
@@ -91,9 +100,18 @@ const CreateCampaignPage = () => {
           <h1 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
             Start Your Campaign
           </h1>
-          <p className="text-xl text-gray-600 dark:text-gray-300">
-            Tell your story and raise funds for what matters most to you.
-          </p>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+            <p className="text-xl text-gray-600 dark:text-gray-300 mb-4 sm:mb-0">
+              Tell your story and raise funds for what matters most to you.
+            </p>
+            {!user && (
+              <div className="bg-blue-50 dark:bg-blue-900 border border-blue-200 dark:border-blue-700 rounded-lg p-4">
+                <p className="text-sm text-blue-700 dark:text-blue-300">
+                  💡 <strong>Guest Mode:</strong> Fill out your campaign details now, login required only when ready to publish!
+                </p>
+              </div>
+            )}
+          </div>
         </div>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
@@ -245,10 +263,13 @@ const CreateCampaignPage = () => {
                     <button
                       type="button"
                       onClick={() => removeImage(index)}
-                      className="absolute top-2 right-2 bg-red-600 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                    {user ? 'Ready to launch?' : 'Ready to save and publish?'}
                     >
                       <X className="h-4 w-4" />
-                    </button>
+                    {user 
+                      ? 'Your campaign will be reviewed before going live. This usually takes 1-2 business days.'
+                      : 'You\'ll need to log in to save your campaign for admin review.'
+                    }
                   </div>
                 ))}
                 
@@ -313,12 +334,14 @@ const CreateCampaignPage = () => {
             <div className="space-y-4">
               <div className="flex flex-wrap gap-2">
                 {tags.map((tag) => (
-                  <span
-                    key={tag}
-                    className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-300"
-                  >
-                    {tag}
+                  {user && (
                     <button
+                      type="button"
+                      className="px-6 py-3 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                    >
+                      Save as Draft
+                    </button>
+                  )}
                       type="button"
                       onClick={() => removeTag(tag)}
                       className="ml-2 text-emerald-600 dark:text-emerald-400 hover:text-emerald-800 dark:hover:text-emerald-200"
@@ -387,7 +410,7 @@ const CreateCampaignPage = () => {
                   ) : (
                     <>
                       <Target className="h-5 w-5 mr-2" />
-                      Create Campaign
+                      {user ? 'Create Campaign' : 'Login & Create Campaign'}
                     </>
                   )}
                 </button>
@@ -395,6 +418,41 @@ const CreateCampaignPage = () => {
             </div>
           </div>
         </form>
+
+        {/* Login Prompt Modal */}
+        {showLoginPrompt && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full p-6">
+              <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+                Login Required
+              </h3>
+              <p className="text-gray-600 dark:text-gray-300 mb-6">
+                To save and publish your campaign for admin review, you need to log in or create an account.
+                Don't worry - your form data will be preserved!
+              </p>
+              <div className="flex flex-col sm:flex-row gap-3">
+                <Link
+                  to="/login"
+                  className="flex-1 bg-emerald-600 text-white py-2 px-4 rounded-lg hover:bg-emerald-700 transition-colors text-center"
+                >
+                  Login
+                </Link>
+                <Link
+                  to="/register"
+                  className="flex-1 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 py-2 px-4 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-center"
+                >
+                  Sign Up
+                </Link>
+                <button
+                  onClick={() => setShowLoginPrompt(false)}
+                  className="px-4 py-2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 transition-colors"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

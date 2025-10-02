@@ -11,7 +11,7 @@ const HomePage = () => {
   const { campaigns, loading } = useCampaigns({ limit: 3 });
 
   const stats = [
-    { icon: Target, label: 'Active Campaigns', value: '234' },
+    { icon: Target, label: 'Active Campaigns', value: campaigns.length > 0 ? campaigns.length.toString() : '234' },
     { icon: Users, label: 'Lives Impacted', value: '12.8K' },
     { icon: TrendingUp, label: 'Funds Raised', value: 'KES 45.2M' },
     { icon: Award, label: 'Success Rate', value: '87%' },
@@ -85,6 +85,24 @@ const HomePage = () => {
           {loading ? (
             <div className="flex justify-center">
               <LoadingSpinner />
+            </div>
+          ) : campaigns.length === 0 ? (
+            <div className="text-center py-12">
+              <div className="text-gray-400 dark:text-gray-600 text-6xl mb-4">
+                🚀
+              </div>
+              <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+                No featured campaigns yet
+              </h3>
+              <p className="text-gray-600 dark:text-gray-300 mb-6">
+                Be the first to create a campaign and make a difference!
+              </p>
+              <Link
+                to="/create-campaign"
+                className="inline-flex items-center px-6 py-3 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors"
+              >
+                Start Your Campaign
+              </Link>
             </div>
           ) : (
             <>
