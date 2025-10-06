@@ -1,21 +1,9 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Upload, X, Plus, DollarSign, Calendar, Target } from 'lucide-react';
-import { useForm } from 'react-hook-form';
-import { yupResolver } from '@hookform/resolvers/yup';
-import * as yup from 'yup';
 import toast from 'react-hot-toast';
 import { useAuth } from '../contexts/AuthContext';
-
-const schema = yup.object({
-  title: yup.string().required('Title is required').min(10, 'Title must be at least 10 characters'),
-  category: yup.string().required('Category is required'),
-  goal: yup.number().required('Goal amount is required').min(100, 'Goal must be at least $100'),
-  description: yup.string().required('Description is required').min(50, 'Description must be at least 50 characters'),
-  story: yup.string().required('Full story is required').min(200, 'Story must be at least 200 characters'),
-  location: yup.string().required('Location is required'),
-  duration: yup.number().required('Campaign duration is required').min(7, 'Minimum 7 days').max(365, 'Maximum 365 days'),
-});
+import { supabase } from '../lib/supabase';
 
 interface CampaignForm {
   title: string;
@@ -27,46 +15,158 @@ interface CampaignForm {
   duration: number;
 }
 
+interface LoginPromptModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onLogin: () => void;
+  onRegister: () => void;
+}
+
+const LoginPromptModal: React.FC<LoginPromptModalProps> = ({ isOpen, onClose, onLogin, onRegister }) => {
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full p-6">
+        <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+          Login Required
+        </h3>
+        <p className="text-gray-600 dark:text-gray-300 mb-6">
+          To save and publish your campaign, you need to create an account or log in.
+        </p>
+        <div className="flex space-x-3">
+          <button
+            onClick={onLogin}
+            className="flex-1 bg-emerald-600 text-white py-2 px-4 rounded-lg hover:bg-emerald-700 transition-colors"
+          >
+            Login
+          </button>
+          <button
+            onClick={onRegister}
+            className="flex-1 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 py-2 px-4 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+          >
+            Register
+          </button>
+          <button
+            onClick={onClose}
+            className="px-4 py-2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const CreateCampaignPage = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const [formData, setFormData] = useState<CampaignForm>({
+    title: '',
+    category: '',
+    goal: 0,
+    description: '',
+    story: '',
+    location: '',
+    duration: 30,
+  });
+  const [errors, setErrors] = useState<Partial<CampaignForm>>({});
   const [images, setImages] = useState<string[]>([]);
   const [tags, setTags] = useState<string[]>([]);
   const [newTag, setNewTag] = useState('');
   const [showLoginPrompt, setShowLoginPrompt] = useState(false);
-
-  const {
-    register,
-    handleSubmit,
-    formState: { errors, isSubmitting },
-    watch,
-  } = useForm<CampaignForm>({
-    resolver: yupResolver(schema),
-  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const categories = [
     'Medical', 'Education', 'Community', 'Emergency', 'Environment', 
     'Animals', 'Sports', 'Technology', 'Arts', 'Religious'
   ];
 
-  const watchedGoal = watch('goal');
-  const watchedTitle = watch('title');
+  const validateForm = (): boolean => {
+    const newErrors: Partial<CampaignForm> = {};
 
-  const onSubmit = async (data: CampaignForm) => {
-    // Check if user is logged in before saving
+    if (!formData.title || formData.title.length < 10) {
+      newErrors.title = 'Title must be at least 10 characters';
+    }
+    if (!formData.category) {
+      newErrors.category = 'Category is required';
+    }
+    if (!formData.goal || formData.goal < 10000) {
+      newErrors.goal = 'Goal must be at least KES 10,000';
+    }
+    if (!formData.description || formData.description.length < 50) {
+      newErrors.description = 'Description must be at least 50 characters';
+    }
+    if (!formData.story || formData.story.length < 200) {
+      newErrors.story = 'Story must be at least 200 characters';
+    }
+    if (!formData.location) {
+      newErrors.location = 'Location is required';
+    }
+    if (!formData.duration || formData.duration < 7 || formData.duration > 365) {
+      newErrors.duration = 'Duration must be between 7 and 365 days';
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleInputChange = (field: keyof CampaignForm, value: string | number) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+    // Clear error when user starts typing
+    if (errors[field]) {
+      setErrors(prev => ({ ...prev, [field]: undefined }));
+    }
+  };
+
+  const onSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!validateForm()) {
+      toast.error('Please fix the errors in the form');
+      return;
+    }
+
     if (!user) {
       setShowLoginPrompt(true);
       return;
     }
 
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      setIsSubmitting(true);
+      
+      const endDate = new Date();
+      endDate.setDate(endDate.getDate() + formData.duration);
+      
+      const { data: campaign, error } = await supabase
+        .from('campaigns')
+        .insert({
+          user_id: user.id,
+          title: formData.title,
+          description: formData.description,
+          story: formData.story,
+          goal_amount: formData.goal,
+          current_amount: 0,
+          category: formData.category,
+          location: formData.location,
+          image_url: images[0] || null,
+          campaign_status: 'draft',
+          verification_status: 'pending',
+          end_date: endDate.toISOString(),
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
       
       toast.success('Campaign created successfully!');
-      navigate('/campaigns/1'); // Navigate to the created campaign
+      navigate(`/campaigns/${campaign.id}`);
     } catch (error) {
+      console.error('Campaign creation error:', error);
       toast.error('Failed to create campaign. Please try again.');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -93,6 +193,14 @@ const CreateCampaignPage = () => {
     setTags(prev => prev.filter(t => t !== tag));
   };
 
+  const handleLoginRedirect = () => {
+    navigate('/login');
+  };
+
+  const handleRegisterRedirect = () => {
+    navigate('/register');
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -114,7 +222,7 @@ const CreateCampaignPage = () => {
           </div>
         </div>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
+        <form onSubmit={onSubmit} className="space-y-8">
           {/* Basic Information */}
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
             <h2 className="text-2xl font-semibold text-gray-900 dark:text-white mb-6">
@@ -127,14 +235,15 @@ const CreateCampaignPage = () => {
                   Campaign Title *
                 </label>
                 <input
-                  {...register('title')}
                   type="text"
+                  value={formData.title}
+                  onChange={(e) => handleInputChange('title', e.target.value)}
                   className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
                   placeholder="Enter a compelling title for your campaign"
                 />
                 {errors.title && (
                   <p className="mt-1 text-sm text-red-600 dark:text-red-400">
-                    {errors.title.message}
+                    {errors.title}
                   </p>
                 )}
               </div>
@@ -144,7 +253,8 @@ const CreateCampaignPage = () => {
                   Category *
                 </label>
                 <select
-                  {...register('category')}
+                  value={formData.category}
+                  onChange={(e) => handleInputChange('category', e.target.value)}
                   className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
                 >
                   <option value="">Select a category</option>
@@ -154,7 +264,7 @@ const CreateCampaignPage = () => {
                 </select>
                 {errors.category && (
                   <p className="mt-1 text-sm text-red-600 dark:text-red-400">
-                    {errors.category.message}
+                    {errors.category}
                   </p>
                 )}
               </div>
@@ -164,14 +274,15 @@ const CreateCampaignPage = () => {
                   Location *
                 </label>
                 <input
-                  {...register('location')}
                   type="text"
+                  value={formData.location}
+                  onChange={(e) => handleInputChange('location', e.target.value)}
                   className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
                   placeholder="City, State/Province, Country"
                 />
                 {errors.location && (
                   <p className="mt-1 text-sm text-red-600 dark:text-red-400">
-                    {errors.location.message}
+                    {errors.location}
                   </p>
                 )}
               </div>
@@ -184,8 +295,9 @@ const CreateCampaignPage = () => {
                   </div>
                 </label>
                 <input
-                  {...register('goal')}
                   type="number"
+                  value={formData.goal || ''}
+                  onChange={(e) => handleInputChange('goal', Number(e.target.value))}
                   min="10000"
                   step="1000"
                   className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
@@ -193,13 +305,13 @@ const CreateCampaignPage = () => {
                 />
                 {errors.goal && (
                   <p className="mt-1 text-sm text-red-600 dark:text-red-400">
-                    {errors.goal.message}
+                    {errors.goal}
                   </p>
                 )}
-                {watchedGoal && (
+                {formData.goal > 0 && (
                   <p className="mt-1 text-sm text-gray-600 dark:text-gray-300">
-                    Platform fee (5%): KES {Math.round(watchedGoal * 0.05).toLocaleString()} | 
-                    You'll receive: KES {Math.round(watchedGoal * 0.95).toLocaleString()}
+                    Platform fee (5%): KES {Math.round(formData.goal * 0.05).toLocaleString()} | 
+                    You'll receive: KES {Math.round(formData.goal * 0.95).toLocaleString()}
                   </p>
                 )}
               </div>
@@ -212,8 +324,9 @@ const CreateCampaignPage = () => {
                   </div>
                 </label>
                 <input
-                  {...register('duration')}
                   type="number"
+                  value={formData.duration}
+                  onChange={(e) => handleInputChange('duration', Number(e.target.value))}
                   min="7"
                   max="365"
                   className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
@@ -221,7 +334,7 @@ const CreateCampaignPage = () => {
                 />
                 {errors.duration && (
                   <p className="mt-1 text-sm text-red-600 dark:text-red-400">
-                    {errors.duration.message}
+                    {errors.duration}
                   </p>
                 )}
               </div>
@@ -231,14 +344,15 @@ const CreateCampaignPage = () => {
                   Short Description *
                 </label>
                 <textarea
-                  {...register('description')}
                   rows={3}
+                  value={formData.description}
+                  onChange={(e) => handleInputChange('description', e.target.value)}
                   className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent resize-none"
                   placeholder="Write a brief description that will appear on your campaign card"
                 />
                 {errors.description && (
                   <p className="mt-1 text-sm text-red-600 dark:text-red-400">
-                    {errors.description.message}
+                    {errors.description}
                   </p>
                 )}
               </div>
@@ -306,14 +420,15 @@ const CreateCampaignPage = () => {
                 Full Campaign Story *
               </label>
               <textarea
-                {...register('story')}
                 rows={10}
+                value={formData.story}
+                onChange={(e) => handleInputChange('story', e.target.value)}
                 className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent resize-none"
                 placeholder="Tell your full story here. Explain why this campaign is important, what you plan to do with the funds, and how people can help. Be detailed and authentic."
               />
               {errors.story && (
                 <p className="mt-1 text-sm text-red-600 dark:text-red-400">
-                  {errors.story.message}
+                  {errors.story}
                 </p>
               )}
               <p className="mt-2 text-sm text-gray-600 dark:text-gray-300">
@@ -419,6 +534,13 @@ const CreateCampaignPage = () => {
           </div>
         </form>
       </div>
+
+      <LoginPromptModal
+        isOpen={showLoginPrompt}
+        onClose={() => setShowLoginPrompt(false)}
+        onLogin={handleLoginRedirect}
+        onRegister={handleRegisterRedirect}
+      />
     </div>
   );
 };

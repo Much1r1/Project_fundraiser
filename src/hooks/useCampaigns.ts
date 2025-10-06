@@ -18,6 +18,15 @@ export const useCampaigns = (filters?: {
   const fetchCampaigns = async () => {
     try {
       setLoading(true);
+      
+      // Check if Supabase is configured
+      if (!supabase) {
+        console.warn('Supabase not configured, using mock data');
+        // Return mock data for development
+        setCampaigns([]);
+        return;
+      }
+      
       let query = supabase
         .from('campaigns')
         .select(`
@@ -50,7 +59,10 @@ export const useCampaigns = (filters?: {
 
       setCampaigns(data || []);
     } catch (err) {
+      console.error('Error fetching campaigns:', err);
       setError(err instanceof Error ? err.message : 'An error occurred');
+      // Set empty campaigns on error to prevent infinite loading
+      setCampaigns([]);
     } finally {
       setLoading(false);
     }
