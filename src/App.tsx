@@ -27,14 +27,7 @@ function App() {
                 <Route path="/" element={<HomePage />} />
                 <Route path="/campaigns" element={<CampaignsPage />} />
                 <Route path="/campaigns/:id" element={<CampaignDetailPage />} />
-                <Route 
-                  path="/create-campaign" 
-                  element={
-                    <ProtectedRoute>
-                      <CreateCampaignPage />
-                    </ProtectedRoute>
-                  } 
-                />
+                <Route path="/create-campaign" element={<CreateCampaignPage />} />
                 <Route 
                   path="/profile" 
                   element={
