@@ -1,21 +1,17 @@
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://your-project.supabase.co';
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'your-anon-key';
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-// Check if Supabase is properly configured
-const isSupabaseConfigured = supabaseUrl && supabaseAnonKey && 
-  !supabaseUrl.includes('your-project') && 
-  !supabaseAnonKey.includes('your-anon-key');
+console.log('Supabase URL:', supabaseUrl);
+console.log('Supabase Key exists:', !!supabaseAnonKey);
 
-if (!isSupabaseConfigured) {
-  console.warn('⚠️ Supabase not configured - using demo mode');
-  console.warn('To connect to your database:');
-  console.warn('1. Create a .env file in your project root');
-  console.warn('2. Add: VITE_SUPABASE_URL=your-supabase-url');
-  console.warn('3. Add: VITE_SUPABASE_ANON_KEY=your-anon-key');
-  console.warn('4. Restart your dev server');
+if (!supabaseUrl || !supabaseAnonKey) {
+  console.error('❌ Supabase configuration missing!');
+  console.error('VITE_SUPABASE_URL:', supabaseUrl);
+  console.error('VITE_SUPABASE_ANON_KEY exists:', !!supabaseAnonKey);
 }
+
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
     autoRefreshToken: true,
@@ -26,7 +22,7 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
 });
 
 // Export configuration status
-export const isConfigured = isSupabaseConfigured;
+export const isConfigured = !!(supabaseUrl && supabaseAnonKey);
 
 // Helper function to get current user ID
 export const getCurrentUserId = () => {

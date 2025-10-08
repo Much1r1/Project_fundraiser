@@ -10,6 +10,8 @@ import LoadingSpinner from '../components/ui/LoadingSpinner';
 const HomePage = () => {
   const { campaigns, loading } = useCampaigns({ limit: 3 });
 
+  console.log('HomePage - campaigns:', campaigns.length, 'loading:', loading);
+
   const stats = [
     { icon: Target, label: 'Active Campaigns', value: campaigns.length > 0 ? campaigns.length.toString() : '234' },
     { icon: Users, label: 'Lives Impacted', value: '12.8K' },
