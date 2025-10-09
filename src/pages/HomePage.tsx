@@ -8,6 +8,9 @@ import { useCampaigns } from '../hooks/useCampaigns';
 import LoadingSpinner from '../components/ui/LoadingSpinner';
 import SupabaseTest from '../components/debug/SupabaseTest';
 
+// Remove the debug component from production
+const showDebug = import.meta.env.DEV;
+
 const HomePage = () => {
   const { campaigns, loading } = useCampaigns({ limit: 3 });
 
@@ -22,8 +25,8 @@ const HomePage = () => {
 
   return (
     <div className="min-h-screen">
-      {/* Temporary Debug Component */}
-      <SupabaseTest />
+      {/* Debug Component - Only in development */}
+      {showDebug && <SupabaseTest />}
       
       {/* Hero Section */}
       <section className="bg-gradient-to-br from-emerald-500 via-blue-600 to-purple-700 text-white py-20">

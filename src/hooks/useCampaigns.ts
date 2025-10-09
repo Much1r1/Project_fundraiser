@@ -18,22 +18,16 @@ export const useCampaigns = (filters?: {
   const fetchCampaigns = async () => {
     try {
       setLoading(true);
-      console.log('Fetching campaigns...');
+      setError(null);
+      console.log('🔍 Starting campaign fetch...');
       
+      // Start with a simple query first
       let query = supabase
         .from('campaigns')
-        .select(`
-          *,
-          users (
-            full_name,
-            avatar_url,
-            verification_status
-          )
-        `)
-        .eq('campaign_status', 'active')
-        .eq('verification_status', 'verified')
+        .select('*')
         .order('created_at', { ascending: false });
 
+      // Add filters if provided
       if (filters?.category && filters.category !== 'All') {
         query = query.eq('category', filters.category);
       }
@@ -46,15 +40,20 @@ export const useCampaigns = (filters?: {
         query = query.limit(filters.limit);
       }
 
-      console.log('Executing query...');
-      const { data, error } = await query;
+      console.log('🚀 Executing query...');
+      const { data, error: queryError } = await query;
 
-      if (error) throw error;
+      console.log('📊 Query result:', { data: data?.length || 0, error: queryError });
 
-      console.log('Campaigns fetched:', data?.length || 0);
+      if (queryError) {
+        console.error('❌ Query error:', queryError);
+        throw queryError;
+      }
+
+      console.log('✅ Campaigns fetched successfully:', data?.length || 0);
       setCampaigns(data || []);
     } catch (err) {
-      console.error('Error fetching campaigns:', err);
+      console.error('💥 Fetch error:', err);
       setError(err instanceof Error ? err.message : 'An error occurred');
       setCampaigns([]);
     } finally {
@@ -79,23 +78,23 @@ export const useCampaign = (id: string) => {
   const fetchCampaign = async () => {
     try {
       setLoading(true);
-      const { data, error } = await supabase
+      console.log('🔍 Fetching single campaign:', id);
+      
+      const { data, error: queryError } = await supabase
         .from('campaigns')
-        .select(`
-          *,
-          users (
-            full_name,
-            avatar_url,
-            verification_status
-          )
-        `)
+        .select('*')
         .eq('id', id)
         .single();
 
-      if (error) throw error;
+      if (queryError) {
+        console.error('❌ Single campaign query error:', queryError);
+        throw queryError;
+      }
 
+      console.log('✅ Single campaign fetched:', data);
       setCampaign(data);
     } catch (err) {
+      console.error('💥 Single campaign fetch error:', err);
       setError(err instanceof Error ? err.message : 'Campaign not found');
     } finally {
       setLoading(false);
