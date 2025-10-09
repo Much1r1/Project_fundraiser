@@ -6,6 +6,7 @@ import StreakTracker from '../components/gamification/StreakTracker';
 import Leaderboard from '../components/gamification/Leaderboard';
 import { useCampaigns } from '../hooks/useCampaigns';
 import LoadingSpinner from '../components/ui/LoadingSpinner';
+import SupabaseTest from '../components/debug/SupabaseTest';
 
 const HomePage = () => {
   const { campaigns, loading } = useCampaigns({ limit: 3 });
@@ -21,6 +22,9 @@ const HomePage = () => {
 
   return (
     <div className="min-h-screen">
+      {/* Temporary Debug Component */}
+      <SupabaseTest />
+      
       {/* Hero Section */}
       <section className="bg-gradient-to-br from-emerald-500 via-blue-600 to-purple-700 text-white py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
