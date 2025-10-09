@@ -1,15 +1,26 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Calendar, Users, MapPin, Verified } from 'lucide-react';
+import { Calendar, MapPin, Verified } from 'lucide-react';
 import { Campaign } from '../../lib/supabase';
 
 interface CampaignCardProps {
-  campaign: Campaign;
+  campaign: Campaign & {
+    users?: {
+      id: string;
+      full_name?: string;
+      avatar_url?: string;
+      verification_status: string;
+    };
+  };
 }
 
 const CampaignCard: React.FC<CampaignCardProps> = ({ campaign }) => {
-  const progressPercentage = (campaign.current_amount / campaign.goal_amount) * 100;
-  
+  const progressPercentage = 
+  campaign.goal_amount > 0
+  ? (campaign.current_amount / campaign.goal_amount) * 100
+  : 0;
+
+  // Format currency
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-KE', {
       style: 'currency',
@@ -18,7 +29,8 @@ const CampaignCard: React.FC<CampaignCardProps> = ({ campaign }) => {
     }).format(amount);
   };
 
-  const getDaysLeft = (endDate: string) => {
+  const getDaysLeft = (endDate: string | null) => {
+    if (!endDate) return 0;
     const end = new Date(endDate);
     const now = new Date();
     const diffTime = end.getTime() - now.getTime();
@@ -34,19 +46,26 @@ const CampaignCard: React.FC<CampaignCardProps> = ({ campaign }) => {
       Emergency: 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300',
       Environment: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-300',
       Animals: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300',
-      Sports: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300',
+      Business: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300',
       Technology: 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-300',
-      Arts: 'bg-pink-100 text-pink-800 dark:bg-pink-900 dark:text-pink-300',
-      Religious: 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300',
+      Creative: 'bg-pink-100 text-pink-800 dark:bg-pink-900 dark:text-pink-300',
+      Faith: 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300',
+      Disaster: 'bg-teal-100 text-teal-800 dark:bg-teal-900 dark:text-teal-300',
+      Charity: 'bg-cyan-100 text-cyan-800 dark:bg-cyan-900 dark:text-cyan-300',
+      'Development & Infrastructure': 'bg-lime-100 text-lime-800 dark:bg-lime-900 dark:text-lime-300',
+      Justice: 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-300',
+      Memorial: 'bg-violet-100 text-violet-800 dark:bg-violet-900 dark:text-violet-300',
+      Others: 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300',
     };
     return colors[category as keyof typeof colors] || 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300';
   };
 
   const daysLeft = getDaysLeft(campaign.end_date);
-  const isVerified = campaign.verification_status === 'verified';
+  const isVerified = campaign.verification_status === 'verified' || campaign.users?.verification_status === 'verified';
 
   return (
     <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300">
+      {/* Cover Image */}
       <div className="relative">
         <img
           src={campaign.image_url || 'https://images.pexels.com/photos/6995242/pexels-photo-6995242.jpeg?auto=compress&cs=tinysrgb&w=800'}
@@ -67,6 +86,7 @@ const CampaignCard: React.FC<CampaignCardProps> = ({ campaign }) => {
         )}
       </div>
 
+      {/* Content */}
       <div className="p-6">
         <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2 line-clamp-2">
           {campaign.title}
@@ -75,6 +95,7 @@ const CampaignCard: React.FC<CampaignCardProps> = ({ campaign }) => {
           {campaign.description}
         </p>
 
+        {/* Progress Bar */}
         <div className="mb-4">
           <div className="flex justify-between text-sm text-gray-600 dark:text-gray-300 mb-2">
             <span>Raised</span>
@@ -96,6 +117,7 @@ const CampaignCard: React.FC<CampaignCardProps> = ({ campaign }) => {
           </div>
         </div>
 
+        {/*  Meta Info */}
         <div className="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400 mb-4">
           <div className="flex items-center">
             <MapPin className="h-4 w-4 mr-1" />
@@ -107,22 +129,27 @@ const CampaignCard: React.FC<CampaignCardProps> = ({ campaign }) => {
           </div>
         </div>
 
+        {/* Organizer Info */}
         <div className="flex items-center mb-4">
           <img
-            src={campaign.users.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(campaign.users.full_name)}&background=10b981&color=fff`}
-            alt={campaign.users.full_name}
+            src={
+              campaign?.users?.avatar_url || 
+              `https://ui-avatars.com/api/?name=${encodeURIComponent(campaign?.users?.full_name || "Anonymous")}&background=10b981&color=fff`
+            }
+            alt={campaign?.users?.full_name || "Unknown user"}
             className="w-8 h-8 rounded-full mr-3"
           />
           <div>
             <p className="text-sm font-medium text-gray-900 dark:text-white">
-              {campaign.users.full_name}
+              {campaign?.users?.full_name || "Anonymous"}
             </p>
             <p className="text-xs text-gray-500 dark:text-gray-400">
               Campaign Organizer
             </p>
           </div>
         </div>
-
+        
+        {/* View Campaign Button */}
         <Link
           to={`/campaigns/${campaign.id}`}
           className="w-full bg-emerald-600 text-white py-2 px-4 rounded-lg hover:bg-emerald-700 transition-colors font-medium text-center block"

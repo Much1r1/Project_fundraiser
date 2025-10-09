@@ -79,8 +79,10 @@ const CreateCampaignPage = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const categories = [
-    'Medical', 'Education', 'Community', 'Emergency', 'Environment', 
-    'Animals', 'Sports', 'Technology', 'Arts', 'Religious'
+    'Medical', 'Education', 'Community', 'Emergency', 'Environment', 'Disaster', 
+    'Animals', 'Creatives', 'Technology & Innovation', 'Charity', 'Religious', 'Business',
+    'Development & Infrastructure', 'Events', 'Memorial', 'Volunteer', 'Faith',
+    'Justice', 'Sustainability & Agriculture', 'Other'
   ];
 
   const validateForm = (): boolean => {
@@ -278,7 +280,7 @@ const CreateCampaignPage = () => {
                   value={formData.location}
                   onChange={(e) => handleInputChange('location', e.target.value)}
                   className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
-                  placeholder="City, State/Province, Country"
+                  placeholder="City/Town, County"
                 />
                 {errors.location && (
                   <p className="mt-1 text-sm text-red-600 dark:text-red-400">

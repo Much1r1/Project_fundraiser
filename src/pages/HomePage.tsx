@@ -25,8 +25,6 @@ const HomePage = () => {
 
   return (
     <div className="min-h-screen">
-      {/* Debug Component - Only in development */}
-      {showDebug && <SupabaseTest />}
       
       {/* Hero Section */}
       <section className="bg-gradient-to-br from-emerald-500 via-blue-600 to-purple-700 text-white py-20">

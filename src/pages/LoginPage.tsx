@@ -91,7 +91,7 @@ const LoginPage = () => {
           </div>
         </div>
         <h2 className="text-center text-4xl font-bold text-gray-900 dark:text-white mb-2">
-          Welcome back
+          Welcome back!
         </h2>
         <p className="text-center text-lg text-gray-600 dark:text-gray-300 mb-8">
           Sign in to continue making a difference
@@ -109,23 +109,14 @@ const LoginPage = () => {
             </div>
           )}
 
-          {/* Admin Login Instructions */}
-          <div className="mb-6 p-4 bg-amber-50 dark:bg-amber-900 border border-amber-200 dark:border-amber-700 rounded-lg">
-            <div className="text-sm text-amber-700 dark:text-amber-300">
-              <p className="font-semibold mb-2">⚠️ First Time Setup:</p>
-              <p className="mb-1">1. First <strong>REGISTER</strong> (not login) with:</p>
-              <p className="mb-1">Email: <code className="bg-amber-100 dark:bg-amber-800 px-1 rounded">admin@fundrise.com</code></p>
-              <p className="mb-1">Password: <code className="bg-amber-100 dark:bg-amber-800 px-1 rounded">admin123456</code></p>
-              <p className="text-xs mt-2 opacity-75">2. Then you can login normally. Registration creates the account first.</p>
-            </div>
-          </div>
-
+          
           <form className="space-y-6" onSubmit={handleSubmit}>
             <div>
               <label htmlFor="email" className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
                 Email address
               </label>
               <div className="relative">
+              <Mail className="h-14 w-5 text-gray-400 absolute left-4 top-4.5" />
                 <input
                   id="email"
                   name="email"
@@ -137,7 +128,6 @@ const LoginPage = () => {
                   className="appearance-none block w-full px-4 py-4 pl-12 border border-gray-300 dark:border-gray-600 rounded-xl placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-all duration-200"
                   placeholder="Enter your email"
                 />
-                <Mail className="h-5 w-5 text-gray-400 absolute left-4 top-4.5" />
               </div>
             </div>
 
@@ -146,6 +136,7 @@ const LoginPage = () => {
                 Password
               </label>
               <div className="relative">
+              <Lock className="h-14 w-5 text-gray-400 absolute left-4 top-4.5" />
                 <input
                   id="password"
                   name="password"
@@ -157,7 +148,7 @@ const LoginPage = () => {
                   className="appearance-none block w-full px-4 py-4 pl-12 pr-12 border border-gray-300 dark:border-gray-600 rounded-xl placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-all duration-200"
                   placeholder="Enter your password"
                 />
-                <Lock className="h-5 w-5 text-gray-400 absolute left-4 top-4.5" />
+                
                 <button
                   type="button"
                   className="absolute inset-y-0 right-0 pr-4 flex items-center"

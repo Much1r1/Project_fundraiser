@@ -1,58 +1,82 @@
-import React from 'react';
+import { useEffect, useState } from 'react';
 import { Trophy, Medal, Award, TrendingUp } from 'lucide-react';
+import { supabase } from '../../lib/supabase'; // Adjusted the import path
 
 interface LeaderboardEntry {
   rank: number;
   name: string;
-  avatar: string;
+  avatar: string | null;
   streak: number;
   donations: number;
   totalDonated: number;
 }
 
 const Leaderboard = () => {
-  const topDonors: LeaderboardEntry[] = [
-    {
-      rank: 1,
-      name: 'Sarah Johnson',
-      avatar: 'https://images.pexels.com/photos/415829/pexels-photo-415829.jpeg?auto=compress&cs=tinysrgb&w=100',
-      streak: 45,
-      donations: 127,
-      totalDonated: 542000,
-    },
-    {
-      rank: 2,
-      name: 'Michael Chen',
-      avatar: 'https://images.pexels.com/photos/1040881/pexels-photo-1040881.jpeg?auto=compress&cs=tinysrgb&w=100',
-      streak: 38,
-      donations: 89,
-      totalDonated: 415000,
-    },
-    {
-      rank: 3,
-      name: 'Emily Rodriguez',
-      avatar: 'https://images.pexels.com/photos/1239291/pexels-photo-1239291.jpeg?auto=compress&cs=tinysrgb&w=100',
-      streak: 32,
-      donations: 76,
-      totalDonated: 368000,
-    },
-    {
-      rank: 4,
-      name: 'David Thompson',
-      avatar: 'https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&w=100',
-      streak: 28,
-      donations: 54,
-      totalDonated: 289000,
-    },
-    {
-      rank: 5,
-      name: 'Lisa Wang',
-      avatar: 'https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg?auto=compress&cs=tinysrgb&w=100',
-      streak: 25,
-      donations: 43,
-      totalDonated: 234000,
-    },
-  ];
+  const [donors, setDonors] = useState<LeaderboardEntry[]>([]); // State to hold leaderboard data
+
+  // Fetch leaderboard data from Supabase (this is a placeholder, replace with actual query)
+  useEffect(() => {
+    const fetchLeaderboard = async () => {
+      // Get donation aggregates from Supabase
+      const { data: donationsData, error } = await supabase
+        .from('donations')
+        .select('donor_id, amount, users(full_name, avatar_url)')
+        .eq('payment_status', 'completed')
+        .order('amount', { ascending: false });
+
+      if (error) {
+        console.error('Error fetching donations:', error);
+        return;
+      }
+
+      // Aggregate donations by donor
+      const userTotals: Record<string, {donations: number; totalDonated: number }> = {};
+      donationsData?.forEach((donation: { donor_id: string; amount: number; users: { full_name: string; avatar_url: string | null }[] }) => {
+        const user = donation.users[0]; // Assuming the first user in the array is the donor
+        if (user) {
+          if (!userTotals[donation.donor_id]) {
+            userTotals[donation.donor_id] = { donations: 0, totalDonated: 0 };
+          }
+          userTotals[donation.donor_id].donations += 1;
+          userTotals[donation.donor_id].totalDonated += donation.amount;
+        }
+      });
+
+        //Fetch user details
+        const { data: usersData } = await supabase
+        .from('users')
+        .select('id, full_name, avatar_url');
+
+        //Optionally, fetch user streaks from a hypothetical 'user_streaks' table
+        const { data: streaksData } = await supabase
+        .from('donor_engagement')
+        .select('donor_id, current_streak');
+
+        const streakMap = streaksData?.reduce((acc: Record<string, number>, s: { donor_id: string; current_streak: number }) => {
+          acc[s.donor_id] = s.current_streak;
+          return acc;
+        }, {} as Record<string, number>);
+
+      // Combine data into leaderboard entries
+      const leaderboard = usersData
+      ?.filter((u: { id: string }) => userTotals[u.id])
+      .map((u: { id: string; full_name: string; avatar_url: string | null }) => ({
+        rank: 0, // Will set ranks later
+        name: u.full_name,
+        avatar: u.avatar_url || null,
+        streak: streakMap?.[u.id] || 0,
+        donations: userTotals[u.id].donations,
+        totalDonated: userTotals[u.id].totalDonated,
+      }))
+      .sort((a: LeaderboardEntry, b: LeaderboardEntry) => b.totalDonated - a.totalDonated)
+      .map((d: LeaderboardEntry, idx: number) => ({ ...d, rank: idx + 1 })) // Assign ranks
+      .slice(0, 5); // Top 5 donors
+
+      setDonors(leaderboard || []);
+    };
+
+    fetchLeaderboard();
+  }, []);
 
   const getRankIcon = (rank: number) => {
     switch (rank) {
@@ -68,7 +92,7 @@ const Leaderboard = () => {
   };
 
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
+    return new Intl.NumberFormat('en- KE', {
       style: 'currency',
       currency: 'KES',
       minimumFractionDigits: 0,
@@ -94,25 +118,26 @@ const Leaderboard = () => {
       </div>
 
       <div className="space-y-4">
-        {topDonors.map((donor) => (
+        {donors.map((donor) => (
           <div
             key={donor.rank}
             className={`flex items-center p-4 rounded-lg border-2 transition-all duration-200 hover:shadow-md ${
               donor.rank <= 3
-                ? 'border-gradient-to-r from-yellow-400 to-orange-500 bg-gradient-to-r from-yellow-50 to-orange-50 dark:from-yellow-900 dark:to-orange-900'
+                ? 'border-gradient-to-r from-yellow-400 to-orange-500 bg-gradient-to-r dark:from-yellow-900 dark:to-orange-900'
                 : 'border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700'
             }`}
           >
             <div className="flex items-center mr-4">
               {getRankIcon(donor.rank)}
             </div>
-            
+
             <img
-              src={donor.avatar}
+              src={donor.avatar || 'https://ui-avatars.com/api/?name=Anonymous&background=10b981&color=fff'}
               alt={donor.name}
               className="w-12 h-12 rounded-full mr-4"
             />
-            
+
+
             <div className="flex-1">
               <h4 className="font-semibold text-gray-900 dark:text-white">
                 {donor.name}
@@ -124,11 +149,12 @@ const Leaderboard = () => {
                 <span>{donor.donations} donations</span>
               </div>
             </div>
-            
+
             <div className="text-right">
               <div className="text-lg font-bold text-gray-900 dark:text-white">
                 {formatCurrency(donor.totalDonated)}
               </div>
+
               <div className="text-sm text-gray-600 dark:text-gray-300">
                 total donated
               </div>
@@ -147,3 +173,6 @@ const Leaderboard = () => {
 };
 
 export default Leaderboard;
+
+        
+

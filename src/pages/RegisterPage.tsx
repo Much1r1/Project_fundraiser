@@ -169,6 +169,7 @@ const RegisterPage = () => {
                 Full name
               </label>
               <div className="relative">
+              <User className="h-14 w-5 text-gray-400 absolute left-4 top-4.5" />
                 <input
                   id="name"
                   name="name"
@@ -180,7 +181,6 @@ const RegisterPage = () => {
                   className="appearance-none block w-full px-4 py-4 pl-12 border border-gray-300 dark:border-gray-600 rounded-xl placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-all duration-200"
                   placeholder="Enter your full name"
                 />
-                <User className="h-5 w-5 text-gray-400 absolute left-4 top-4.5" />
               </div>
             </div>
 
@@ -189,6 +189,7 @@ const RegisterPage = () => {
                 Email address
               </label>
               <div className="relative">
+                <Mail className="h-14 w-5 text-gray-400 absolute left-4 top-4.5" />
                 <input
                   id="email"
                   name="email"
@@ -200,7 +201,6 @@ const RegisterPage = () => {
                   className="appearance-none block w-full px-4 py-4 pl-12 border border-gray-300 dark:border-gray-600 rounded-xl placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-all duration-200"
                   placeholder="Enter your email"
                 />
-                <Mail className="h-5 w-5 text-gray-400 absolute left-4 top-4.5" />
               </div>
             </div>
 
@@ -209,6 +209,7 @@ const RegisterPage = () => {
                 Password
               </label>
               <div className="relative">
+              <Lock className="h-14 w-5 text-gray-400 absolute left-4 top-4.5" />
                 <input
                   id="password"
                   name="password"
@@ -220,7 +221,6 @@ const RegisterPage = () => {
                   className="appearance-none block w-full px-4 py-4 pl-12 pr-12 border border-gray-300 dark:border-gray-600 rounded-xl placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-all duration-200"
                   placeholder="Create a strong password"
                 />
-                <Lock className="h-5 w-5 text-gray-400 absolute left-4 top-4.5" />
                 <button
                   type="button"
                   className="absolute inset-y-0 right-0 pr-4 flex items-center"
@@ -260,6 +260,7 @@ const RegisterPage = () => {
                 Confirm password
               </label>
               <div className="relative">
+              <Lock className="h-14 w-5 text-gray-400 absolute left-4 top-4.5" />
                 <input
                   id="confirmPassword"
                   name="confirmPassword"
@@ -271,7 +272,6 @@ const RegisterPage = () => {
                   className="appearance-none block w-full px-4 py-4 pl-12 pr-12 border border-gray-300 dark:border-gray-600 rounded-xl placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-all duration-200"
                   placeholder="Confirm your password"
                 />
-                <Lock className="h-5 w-5 text-gray-400 absolute left-4 top-4.5" />
                 <button
                   type="button"
                   className="absolute inset-y-0 right-0 pr-4 flex items-center"

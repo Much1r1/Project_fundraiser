@@ -89,7 +89,7 @@ const Footer = () => {
 
         <div className="border-t border-gray-800 pt-8 mt-8 text-center">
           <p className="text-gray-300">
-            © 2024 FundRise. All rights reserved. Made with ❤️ for communities worldwide.
+            © 2025 FundRise. All rights reserved.
           </p>
         </div>
       </div>
