@@ -54,22 +54,37 @@ const Navbar = () => {
             >
               {isDark ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
             </button>
-            
+
             {user ? (
               <>
                 <button className="p-2 text-gray-700 dark:text-gray-200 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">
                   <Bell className="h-5 w-5" />
                 </button>
-         
+                <Link
+                  to="/profile"
+                  className="flex items-center space-x-2 px-3 py-2 text-gray-700 dark:text-gray-200 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"
+                >
+                  <User className="h-5 w-5" />
+                  <span className="text-sm font-medium">{user.full_name || user.email}</span>
+                </Link>
+                {isAdmin && (
+                  <Link
+                    to="/admin"
+                    className="text-gray-700 dark:text-gray-200 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"
+                  >
+                    Admin
+                  </Link>
+                )}
+                <button
+                  onClick={logout}
+                  className="p-2 text-gray-700 dark:text-gray-200 hover:text-red-600 dark:hover:text-red-400 transition-colors"
+                  title="Logout"
+                >
+                  <LogOut className="h-5 w-5" />
+                </button>
               </>
             ) : (
               <div className="flex items-center space-x-2">
-                <Link
-                  to="/Profile"
-                  className="text-gray-700 dark:text-gray-200 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"
-                >
-                  Profile
-                </Link>
                 <Link
                   to="/login"
                   className="text-gray-700 dark:text-gray-200 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"

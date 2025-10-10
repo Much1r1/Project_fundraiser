@@ -9,7 +9,7 @@ import {
   Activity, BarChart3, Share2, Copy, ExternalLink, Trash2
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
-import { useUser } from '../hooks/useUser';
+import { useAuth } from '../contexts/AuthContext';
 import toast from 'react-hot-toast';
 
 type Campaign = {
@@ -37,8 +37,8 @@ export default function ProfilePage() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const activeTab = searchParams.get('tab') || 'overview';
-  
-  const { user, loading: userLoading } = useUser();
+
+  const { user, loading: userLoading, refreshUser } = useAuth();
 
   // States
   const [isEditing, setIsEditing] = useState(false);
@@ -80,9 +80,9 @@ export default function ProfilePage() {
   useEffect(() => {
     if (user) {
       setEditForm({
-        full_name: user.user_metadata?.full_name || user.email || '',
-        phone: user.user_metadata?.phone || '',
-        bio: user.user_metadata?.bio || '',
+        full_name: user.full_name || user.email || '',
+        phone: user.phone || '',
+        bio: user.bio || '',
       });
       fetchUserData();
     }
@@ -117,7 +117,7 @@ export default function ProfilePage() {
             image_url
           )
         `)
-        .eq('user_id', user.id)
+        .eq('donor_id', user.id)
         .order('created_at', { ascending: false });
 
       if (!donationsError && donationsData) {
@@ -153,18 +153,23 @@ export default function ProfilePage() {
     if (!user) return;
 
     try {
-      const { error } = await supabase.auth.updateUser({
-        data: {
+      // Update the users table
+      const { error: dbError } = await supabase
+        .from('users')
+        .update({
           full_name: editForm.full_name,
           phone: editForm.phone,
           bio: editForm.bio,
-        }
-      });
+        })
+        .eq('id', user.id);
 
-      if (error) throw error;
+      if (dbError) throw dbError;
 
       toast.success('Profile updated successfully!');
       setIsEditing(false);
+
+      // Refresh user data from context
+      await refreshUser();
     } catch (error: any) {
       toast.error(error.message || 'Failed to update profile');
     }
@@ -226,7 +231,7 @@ export default function ProfilePage() {
   ];
 
   // Show loading state only briefly
-  if (userLoading && !user) {
+  if (userLoading) {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
         <div className="text-center">
@@ -237,8 +242,8 @@ export default function ProfilePage() {
     );
   }
 
-  // Show login prompt if no user after timeout
-  if (showLoginPrompt && !user) {
+  // Show login prompt if no user
+  if (!user) {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
         <div className="text-center">
@@ -264,7 +269,7 @@ export default function ProfilePage() {
           <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
             <div className="relative">
               <img
-                src={user.user_metadata?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(editForm.full_name)}&background=10b981&color=fff&size=120`}
+                src={user.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(editForm.full_name)}&background=10b981&color=fff&size=120`}
                 alt={editForm.full_name}
                 className="w-24 h-24 md:w-32 md:h-32 rounded-full border-4 border-white shadow-lg"
               />
@@ -276,6 +281,7 @@ export default function ProfilePage() {
             <div className="flex-1 text-center md:text-left">
               <h1 className="text-3xl font-bold mb-2">{editForm.full_name}</h1>
               <p className="text-blue-100 mb-4">{user.email}</p>
+              <p className="text-sm text-blue-200">Member since {new Date(user.created_at).toLocaleDateString()}</p>
               
               {/* Quick Stats */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
